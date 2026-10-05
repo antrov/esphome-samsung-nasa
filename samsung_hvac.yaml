@@ -1,0 +1,181 @@
+# Heat pump configuration migrated from antrov/esphome_samsung_hvac_bus (component
+# "samsung_ac", file esphome_samsung_hvac_bus.yaml) to this component "samsung_nasa".
+#
+# Home Assistant identifies an ESPHome entity by device MAC + platform + the hash of the
+# entity NAME. To keep every entity (entity_id, history, statistics, automations, dashboards)
+# the device name, the entity names and the platform of each entity are kept exactly as before.
+# Do not rename anything here without reading MIGRATION.md.
+
+esphome:
+  name: samsung_hvac
+  friendly_name: Climate
+  min_version: 2026.5.0
+
+esp32:
+  board: m5stack-atom
+  framework:
+    type: arduino
+
+# Import external component from GitHub (this fork / branch)
+external_components:
+  - source:
+      type: git
+      url: https://github.com/antrov/esphome-samsung-nasa
+      ref: claude/bold-tesla-l2fjw5
+    components: [samsung_nasa]
+
+# [Optional] - Create web interface where you can control the heat pump from your web browser
+web_server:
+  port: 80
+
+# Enable logging
+logger:
+  logs:
+    component: ERROR
+
+# Enable Home Assistant API (no encryption key, as before - otherwise Home Assistant asks to re-authenticate)
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap: {}
+
+captive_portal:
+
+# Specify pins used by the board to communicate over RS485 - ATOM Tail485
+uart:
+  tx_pin: GPIO26
+  rx_pin: GPIO32
+  baud_rate: 9600
+  parity: EVEN
+
+## SAMSUNG NASA CONFIGURATION
+samsung_nasa:
+  # Both were enabled in the previous configuration (the non_nasa_keepalive option does not exist
+  # here: this component speaks NASA only)
+  debug_log_messages: true
+  debug_log_undefined_messages: true
+  nasa_client: {}
+  devices:
+    # 0x4xxx messages come from the indoor (hydro) unit, 0x8xxx and 0x24xx from the outdoor unit
+    - address: 20.00.00
+      id: nasa_device_1
+    - address: 10.00.00
+      id: nasa_device_2
+
+sensor:
+  # --- Outdoor unit (10.00.00) ---
+  # was: error_code
+  - platform: samsung_nasa
+    message: 0x8235
+    nasa_device_id: nasa_device_2
+    name: "error_code"
+  # was: outdoor_instantaneous_power
+  - platform: samsung_nasa
+    message: 0x8413
+    nasa_device_id: nasa_device_2
+    name: "Outdoor Instantaneous Power"
+  # was: outdoor_cumulative_energy
+  - platform: samsung_nasa
+    message: 0x8414
+    nasa_device_id: nasa_device_2
+    name: "Outdoor Cumulative Energy"
+  # was: outdoor_current
+  - platform: samsung_nasa
+    message: 0x8217
+    nasa_device_id: nasa_device_2
+    name: "Outdoor Current"
+    icon: mdi:current-ac
+  # was: outdoor_voltage
+  - platform: samsung_nasa
+    message: 0x24FC
+    nasa_device_id: nasa_device_2
+    name: "Outdoor Voltage"
+  # was: outdoor_temperature
+  - platform: samsung_nasa
+    message: 0x8204
+    nasa_device_id: nasa_device_2
+    name: "Outdoor temperature"
+
+  # --- Indoor (hydro) unit (20.00.00) ---
+  # The previous file listed these under 10.00.00 (as in the upstream example), but the
+  # unit reports 0x4xxx messages itself, so they are read from 20.00.00 here.
+  # was: water_temperature
+  - platform: samsung_nasa
+    message: 0x4237
+    nasa_device_id: nasa_device_1
+    name: "Warm water"
+
+  # --- Added in the fork's code (main branch), not in esphome_samsung_hvac_bus.yaml ---
+  # The entity names below could NOT be recovered from the repository (that yaml is git-ignored
+  # and the wip_hammer copy does not contain them). They follow the fork's option names.
+  # TODO: replace each name with the one used in Home Assistant, otherwise new entities appear.
+  # Attributes (unit, device_class, state_class, icon, scaling) are the fork's, unchanged.
+  # was: flow
+  - platform: samsung_nasa
+    message: 0x42E9
+    nasa_device_id: nasa_device_1
+    name: "Flow"
+    unit_of_measurement: lpm
+    device_class: water
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:pump
+  # was: water_outlet_zone1_temperature
+  - platform: samsung_nasa
+    message: 0x42D8
+    nasa_device_id: nasa_device_1
+    name: "Water Outlet Zone1 Temperature"
+    unit_of_measurement: °C
+    device_class: water
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:thermometer-water
+    filters:
+      - multiply: 0.1
+  # was: water_outlet_zone2_temperature
+  - platform: samsung_nasa
+    message: 0x42D9
+    nasa_device_id: nasa_device_1
+    name: "Water Outlet Zone2 Temperature"
+    unit_of_measurement: °C
+    device_class: water
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:thermometer-water
+    filters:
+      - multiply: 0.1
+
+binary_sensor:
+  # Added in the fork's code, name not recoverable (see TODO above)
+  # was: threeway_valve_tank
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "Threeway Valve Tank"
+
+number:
+  # was: water_target_temperature
+  - platform: samsung_nasa
+    message: 0x4235
+    nasa_device_id: nasa_device_1
+    name: "Hot Water Target Temperature"
+  # Added in the fork's code, name not recoverable (see TODO above)
+  # was: heating_curve_shift
+  - platform: samsung_nasa
+    message: 0x4248
+    nasa_device_id: nasa_device_1
+    name: "Heating Curve Shift"
+
+select:
+  # was: water_heater_mode
+  # The labels are the ones samsung_ac used (this component calls the first one "Economy").
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: "Hotwater Mode"
+    options: ["Eco", "Standard", "Power", "Force"]

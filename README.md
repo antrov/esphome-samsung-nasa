@@ -182,6 +182,17 @@ So for example message 0x4066 (hot water mode):
 }
 ```
 
+The option labels can be renamed with `options`, for example to keep the labels that Home Assistant history and automations already use. The list must have the same number of unique labels, in the same order, because the position of an option is the value sent to the unit:
+
+```yaml
+select:
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: Hot Water Mode
+    options: ["Eco", "Standard", "Power", "Force"]
+```
+
 ### Supported Commands  
 
 | NASA Code | NASA Label                  | Description                                     |
