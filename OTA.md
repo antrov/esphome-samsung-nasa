@@ -30,6 +30,20 @@ esphome run samsung_hvac.yaml --device <IP_URZADZENIA>   # kompilacja i OTA
 
 Do kompilacji z lokalnych plików (zamiast pobierania z GitHuba) zmień w `external_components` źródło na `- source: components`.
 
+### Wariant B w devcontainerze
+
+Katalog `.devcontainer/` przygotowuje środowisko CLI (Python 3.12, ESPHome ≥ 2026.5, rozszerzenie ESPHome dla VS Code, cache toolchainów PlatformIO w wolumenie Docker).
+
+1. Otwórz repozytorium w VS Code i wybierz **Reopen in Container**.
+2. Po zbudowaniu kontenera uzupełnij `secrets.yaml` (skrypt tworzy go z `secrets.yaml.example`).
+3. W terminalu kontenera uruchom polecenia z wariantu B (`esphome config`, `esphome run samsung_hvac.yaml --device <IP>`).
+
+Uwagi:
+- `"--network=host"` działa tylko na Linuksie i pozwala używać nazwy `samsung_hvac.local`. Na Docker Desktop (macOS/Windows) usuń tę opcję z `devcontainer.json` i podawaj adres IP urządzenia.
+- Wgrywanie przez USB z kontenera wymaga przekazania portu szeregowego (np. dodaj `"--device=/dev/ttyUSB0"` do `runArgs`). Na macOS/Windows prościej wgrać przez USB poza kontenerem albo przez https://web.esphome.io.
+- Pierwsza kompilacja pobiera toolchain (kilkaset MB), kolejne korzystają z wolumenu.
+- Devcontainera nie uruchamiałem (brak Dockera w tej sesji), więc zgłoś błędy budowania.
+
 ## Po aktualizacji
 
 1. Log urządzenia (HA → urządzenie → *Logi*, albo `esphome logs samsung_hvac.yaml`) powinien pokazać `Auto configured NASA device 20.00.00` i `10.00.00`, a po chwili `Discovered devices`.
