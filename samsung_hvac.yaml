@@ -46,7 +46,9 @@ wifi:
 
 captive_portal:
 
-# Specify pins used by the board to communicate over RS485 - ATOM Tail485
+# M5Atom Lite + ATOM Tail485 (board m5stack-atom). The Tail485 converter switches the RS485
+# direction by itself, so no flow_control_pin is needed. Pins: TX = G26, RX = G32.
+# (For ATOM Lite + Atom RS485 Base use tx_pin: GPIO19 and rx_pin: GPIO22 instead.)
 uart:
   tx_pin: GPIO26
   rx_pin: GPIO32
