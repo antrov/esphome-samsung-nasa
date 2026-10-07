@@ -37,6 +37,7 @@ Czego nie przenoszę: w `esphome_samsung_hvac_bus.yaml` urządzenie `20.00.00` m
 
 ## Świadome różnice
 
+- **`friendly_name`.** Stary plik miał `Climate`, ale w HA urządzenie nazywa się `Samsung HVAC` (stąd `entity_id` typu `sensor.samsung_hvac_*`), więc tak je nazwałem.
 - **Adres jednostki dla `0x4xxx`.** W starym pliku encje CWU stały pod `10.00.00` (skopiowane z `example.yaml` upstreamu). Obie implementacje kierują wiadomość do encji po adresie nadawcy, a wiadomości `0x4xxx` wysyła jednostka wewnętrzna (hydro) `20.00.00`, więc tu są odczytywane z `20.00.00`. Jeśli po wgraniu `Warm water`, `Hot Water Target Temperature` lub `Hotwater Mode` są `unknown`, sprawdź w logu linie `Undefined s:… d:… 0x4237 …` (flaga `debug_log_undefined_messages` jest włączona) i zmień adres.
 - **Opcje selecta `Hotwater Mode`.** `samsung_nasa` nazywa pierwszą opcję `Economy`, a `samsung_ac` używał `Eco`. Zmiana nazwy opcji zmieniłaby stany w historii i zepsuła wywołania `select.select_option` z `"Eco"`. Dodałem do platformy `select` opcjonalny parametr `options` (zmiana w `components/samsung_nasa/select/__init__.py`, opisana w README). Bez `options` zachowanie się nie zmienia.
 - **`error_code`.** Komponent dodaje filtr `delta: 1.0` (publikuje tylko przy zmianie kodu).
