@@ -25,13 +25,13 @@ Jednostka, `device_class` i `state_class` nie zmieniają `unique_id`, ale zmiana
 | `water_temperature` | sensor | `0x4237` | 20.00.00 | `Warm water` | yaml |
 | `water_target_temperature` | number | `0x4235` | 20.00.00 | `Hot Water Target Temperature` | yaml |
 | `water_heater_mode` | select | `0x4066` | 20.00.00 | `Hotwater Mode` | yaml |
-| `flow` | sensor | `0x42E9` | 20.00.00 | `Flow` | **do weryfikacji** |
-| `water_outlet_zone1_temperature` | sensor | `0x42D8` | 20.00.00 | `Water Outlet Zone1 Temperature` | **do weryfikacji** |
-| `water_outlet_zone2_temperature` | sensor | `0x42D9` | 20.00.00 | `Water Outlet Zone2 Temperature` | **do weryfikacji** |
-| `threeway_valve_tank` | binary_sensor | `0x4067` | 20.00.00 | `Threeway Valve Tank` | **do weryfikacji** |
-| `heating_curve_shift` | number | `0x4248` | 20.00.00 | `Heating Curve Shift` | **do weryfikacji** |
+| `flow` | sensor | `0x42E9` | 20.00.00 | `Flow` | lista encji w HA |
+| `water_outlet_zone1_temperature` | sensor | `0x42D8` | 20.00.00 | `Water Outlet Zone 1` | lista encji w HA |
+| `water_outlet_zone2_temperature` | sensor | `0x42D9` | 20.00.00 | `Water Outlet Zone 2` | lista encji w HA |
+| `threeway_valve_tank` | binary_sensor | `0x4067` | 20.00.00 | `Threeway Valve on Tank` | lista encji w HA |
+| `heating_curve_shift` | number | `0x4248` | 20.00.00 | `Heating Curve Shift` | lista encji w HA |
 
-**Nazwy „do weryfikacji”.** Te pięć encji istnieje w kodzie Twojego forka (`main`), ale ich nazw nie ma w repozytorium. Prywatny `esphome_samsung_hvac_bus.yaml` jest w `.gitignore`, a kopia z gałęzi `wip_hammer` ich nie zawiera. Użyłem nazw wynikających z nazw opcji. Jeśli w HA nazywają się inaczej, popraw `name:` w `samsung_hvac.yaml` (miejsca oznaczone `TODO`). W przeciwnym razie powstaną nowe encje, a stare zostaną osierocone.
+**Nazwy z listy encji w HA.** Pięć encji z kodu forka (`main`) nie miało nazw w repozytorium (prywatny yaml jest w `.gitignore`). Nazwy zostały potwierdzone na liście encji urządzenia `Samsung HVAC` w HA.
 
 Czego nie przenoszę: w `esphome_samsung_hvac_bus.yaml` urządzenie `20.00.00` miało wszystkie wpisy w komentarzu (brak `climate`, `room_temperature` itd.), więc nic z niego nie przenoszę.
 
@@ -56,10 +56,9 @@ Nie sprawdzone: kompilacja firmware do końca (pobieranie toolchaina przez proxy
 
 ## Przed wgraniem
 
-1. Sprawdź w HA (Ustawienia → Urządzenia → ESPHome → `samsung_hvac`) nazwy pięciu encji „do weryfikacji” i popraw `samsung_hvac.yaml`.
-2. Dodaj do `secrets.yaml` `wifi_ssid` i `wifi_password`.
-3. Wgraj na to samo ESP32 (ten sam MAC).
-4. Po pierwszym połączeniu nie powinny pojawić się encje z sufiksem `_2`. Jeśli się pojawią, nazwa lub platforma różni się od starej.
-5. Powrót do poprzedniego stanu: wgraj stary firmware (`esphome_samsung_hvac_bus.yaml` na ESPHome zgodnym z `samsung_ac`).
+1. Dodaj do `secrets.yaml` `wifi_ssid` i `wifi_password`.
+2. Wgraj na to samo ESP32 (ten sam MAC).
+3. Po pierwszym połączeniu nie powinny pojawić się encje z sufiksem `_2`. Jeśli się pojawią, nazwa lub platforma różni się od starej.
+4. Powrót do poprzedniego stanu: wgraj stary firmware (`esphome_samsung_hvac_bus.yaml` na ESPHome zgodnym z `samsung_ac`).
 
 Po zmergowaniu gałęzi do `main` zmień `ref:` w `external_components` na `main`.

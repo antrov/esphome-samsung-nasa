@@ -111,9 +111,7 @@ sensor:
     name: "Warm water"
 
   # --- Added in the fork's code (main branch), not in esphome_samsung_hvac_bus.yaml ---
-  # The entity names below could NOT be recovered from the repository (that yaml is git-ignored
-  # and the wip_hammer copy does not contain them). They follow the fork's option names.
-  # TODO: replace each name with the one used in Home Assistant, otherwise new entities appear.
+  # Names confirmed against the entity list in Home Assistant.
   # Attributes (unit, device_class, state_class, icon, scaling) are the fork's, unchanged.
   # was: flow
   - platform: samsung_nasa
@@ -129,7 +127,7 @@ sensor:
   - platform: samsung_nasa
     message: 0x42D8
     nasa_device_id: nasa_device_1
-    name: "Water Outlet Zone1 Temperature"
+    name: "Water Outlet Zone 1"
     unit_of_measurement: °C
     device_class: water
     state_class: measurement
@@ -141,7 +139,7 @@ sensor:
   - platform: samsung_nasa
     message: 0x42D9
     nasa_device_id: nasa_device_1
-    name: "Water Outlet Zone2 Temperature"
+    name: "Water Outlet Zone 2"
     unit_of_measurement: °C
     device_class: water
     state_class: measurement
@@ -151,12 +149,12 @@ sensor:
       - multiply: 0.1
 
 binary_sensor:
-  # Added in the fork's code, name not recoverable (see TODO above)
+  # Added in the fork's code
   # was: threeway_valve_tank
   - platform: samsung_nasa
     message: 0x4067
     nasa_device_id: nasa_device_1
-    name: "Threeway Valve Tank"
+    name: "Threeway Valve on Tank"
 
 number:
   # was: water_target_temperature
@@ -164,7 +162,7 @@ number:
     message: 0x4235
     nasa_device_id: nasa_device_1
     name: "Hot Water Target Temperature"
-  # Added in the fork's code, name not recoverable (see TODO above)
+  # Added in the fork's code
   # was: heating_curve_shift
   - platform: samsung_nasa
     message: 0x4248
