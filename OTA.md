@@ -42,9 +42,40 @@ Do kompilacji z lokalnych plików (zamiast pobierania z GitHuba) zmień w `exter
 
 | Objaw | Co robić |
 |---|---|
-| OTA kończy się błędem lub urządzenie nie wstaje | ESP32 po nieudanym starcie wraca do poprzedniego firmware (tryb awaryjny ESPHome). Poczekaj kilka minut. |
+| OTA kończy się błędem w trakcie wgrywania | Uszkodzony lub przerwany obraz nie zostaje uruchomiony, więc urządzenie dalej działa na starym firmware. Ponów OTA. |
+| Firmware się wgrał, ale urządzenie restartuje się w pętli | Po kilku nieudanych startach ESPHome uruchamia tryb awaryjny (tylko Wi-Fi i OTA). Wgraj poprawny firmware przez OTA lub USB (sekcja niżej). |
 | Urządzenie wstało, ale nie ma go w sieci | Prawdopodobnie złe dane Wi-Fi. Połącz się z siecią `samsung_hvac` (punkt dostępowy), otwórz portal i wpisz właściwe dane, albo wgraj ponownie przez USB. |
 | Błąd „firmware too large” przy OTA | Zbuduj najpierw minimalny firmware pośredni (np. samo `wifi`, `ota`, `api`), wgraj go OTA, a potem wgraj docelowy. |
 | Trzeba wrócić do starego firmware | Zbuduj `esphome_samsung_hvac_bus.yaml` na ESPHome 2024.12 i wgraj przez OTA lub USB. Encje zachowają `unique_id` (te same nazwy). |
 
 Wgranie przez USB (gdy OTA zawodzi): podłącz ATOM-a i uruchom `esphome run samsung_hvac.yaml --device /dev/ttyUSB0` (na Windows `COM3` itp.). Alternatywnie wgraj plik `firmware.factory.bin` z `.esphome/build/samsung_hvac/.pioenvs/samsung_hvac/` przez https://web.esphome.io.
+
+## Elementy konfiguracji, które przyjąłem bez weryfikacji
+
+Nic z poniższego nie jest w stanie fizycznie uszkodzić ESP32. Najgorszy skutek to urządzenie niedostępne w sieci albo pętla restartów, a z obu da się wyjść przez USB (następna sekcja). Nie sprawdziłem żadnego z tych punktów na sprzęcie, a firmware nie został w tej sesji skompilowany do końca.
+
+| Element | Założenie | Skutek, jeśli jest błędne |
+|---|---|---|
+| Dane Wi-Fi w `secrets.yaml` | Takie same jak w działającym firmware (nie mam ich) | Urządzenie nie łączy się z siecią i po chwili uruchamia punkt dostępowy `samsung_hvac` |
+| Szyfrowanie API i hasło OTA | Brak (jak w Twoim `esphome_samsung_hvac_bus.yaml`, który miał puste hasła) | Jeśli działający firmware ma klucz API lub hasło OTA, OTA odrzuci hasło albo HA nie połączy się po aktualizacji i poprosi o ponowne uwierzytelnienie |
+| Skok wersji ESPHome (2024.12 → 2026.6) i `framework: arduino` | OTA przez tak dużą różnicę przejdzie, a obraz zmieści się w partycji | Błąd „firmware too large” albo odrzucenie obrazu (urządzenie zostaje na starym firmware) |
+| Adres jednostki dla wiadomości `0x4xxx` (`20.00.00`) | Dane CWU wysyła jednostka hydro, nie zewnętrzna | Encje CWU i obiegu są `unknown`, bez wpływu na ESP32 |
+| Zapis do pompy (`Hot Water Target Temperature`, `Hotwater Mode`, `Heating Curve Shift`) | Zakresy i przeliczenia z komponentu są poprawne, także dla wartości ujemnych `Heating Curve Shift` | Nie dotyczy ESP32, ale pompa może dostać złą wartość. Przy pierwszym użyciu sprawdź na wyświetlaczu pompy, że ustawiona wartość się zgadza |
+| Piny UART (`GPIO26`/`GPIO32`) i parzystość `EVEN` | Wzięte z Twojego pliku, zgodne z Tail485 | Brak danych z magistrali, urządzenie działa, ale encje nie dostają wartości |
+| `debug_log_messages: true` | Logi aż tak nie obciążą pętli | Wolniejsze działanie lub opóźnienia. Wyłącz po sprawdzeniu |
+
+## Odzyskiwanie urządzenia
+
+Poziomy od najłatwiejszego:
+
+1. **Zła sieć Wi-Fi.** Połącz się z siecią Wi-Fi `samsung_hvac`, otwórz portal (zwykle `192.168.4.1`) i wpisz właściwe dane. Albo popraw `secrets.yaml` i wgraj przez USB.
+2. **Pętla restartów.** Po kilku nieudanych startach urządzenie wchodzi w tryb awaryjny. Wgraj poprawną konfigurację przez OTA (`esphome run samsung_hvac.yaml --device <IP>`).
+3. **Brak połączenia z HA po OTA** (klucz API). Usuń urządzenie w HA i dodaj ponownie, albo wgraj konfigurację z kluczem, którego oczekuje HA.
+4. **Wgranie przez USB** (zawsze działa, bo bootloader ROM układu ESP32 nie jest nadpisywany przez OTA):
+   - Podłącz M5Atom Lite kablem USB-C do komputera.
+   - `esphome run samsung_hvac.yaml --device /dev/ttyUSB0` (Linux/macOS: `/dev/ttyUSB0` lub `/dev/cu.usbserial-*`, Windows: `COM3` itp.). Jeśli ESPHome nie przełączy układu w tryb wgrywania, wejdź w niego ręcznie zgodnie z dokumentacją M5Stack (przytrzymanie przycisku przy podłączaniu).
+   - Alternatywnie wgraj `firmware.factory.bin` przez https://web.esphome.io (Chrome lub Edge, przycisk *Connect*, potem *Install*). Plik leży w `.esphome/build/samsung_hvac/.pioenvs/samsung_hvac/`.
+   - Ostateczność: *Erase* w web.esphome.io i wgranie od nowa. Kasuje zapisane ustawienia Wi-Fi, więc wgrywasz z `secrets.yaml`.
+5. **Powrót do `samsung_ac`.** Zbuduj `esphome_samsung_hvac_bus.yaml` na ESPHome 2024.12 i wgraj przez USB lub OTA.
+
+Przed OTA zrób **Validate** i kompilację w ESPHome. Jeśli się nie skompiluje, urządzenia to nie dotyczy, bo nic jeszcze nie zostało wgrane.
