@@ -50,7 +50,27 @@ esphome run samsung_hvac.yaml --device /dev/cu.usbserial-XXXX
 esphome logs samsung_hvac.yaml --device <DEVICE_IP>
 ```
 
-In a new terminal run `source ~/esphome-venv/bin/activate` again before using `esphome`. See [OTA.md](OTA.md) for updating a running device and for recovery.
+In a new terminal run `source ~/esphome-venv/bin/activate` again before using `esphome`.
+
+### Alternative: uvx (no manual virtual environment)
+
+[uv](https://docs.astral.sh/uv/) downloads a suitable Python and runs ESPHome in a cached, isolated environment:
+
+```bash
+brew install uv git
+
+git clone https://github.com/antrov/esphome-samsung-nasa
+cd esphome-samsung-nasa
+cp secrets.yaml.example secrets.yaml      # then fill in wifi_ssid and wifi_password
+
+uvx --python 3.12 --from "esphome>=2026.5" esphome config samsung_hvac.yaml
+uvx --python 3.12 --from "esphome>=2026.5" esphome run samsung_hvac.yaml --device <DEVICE_IP>
+uvx --python 3.12 --from "esphome>=2026.5" esphome logs samsung_hvac.yaml --device <DEVICE_IP>
+```
+
+To keep the commands short, define `alias esphome='uvx --python 3.12 --from "esphome>=2026.5" esphome'` in `~/.zshrc`, or install it once with `uv tool install --python 3.12 "esphome>=2026.5"` and call `esphome` directly.
+
+See [OTA.md](OTA.md) for updating a running device and for recovery.
 
 ## Compilation Using Arduino or ESP-IDF
 
