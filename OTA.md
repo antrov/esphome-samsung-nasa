@@ -22,7 +22,6 @@ Instrukcja przejścia z firmware `samsung_ac` na `samsung_nasa` bez rozkręcania
 
 ```bash
 git clone https://github.com/antrov/esphome-samsung-nasa && cd esphome-samsung-nasa
-git checkout claude/bold-tesla-l2fjw5        # po zmergowaniu PR: main
 cp secrets.yaml.example secrets.yaml         # i uzupełnij Wi-Fi
 esphome config samsung_hvac.yaml             # walidacja
 esphome run samsung_hvac.yaml --device <IP_URZADZENIA>   # kompilacja i OTA
