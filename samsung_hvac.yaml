@@ -185,11 +185,11 @@ sensor:
   - platform: samsung_nasa
     message: 0x4202
     nasa_device_id: nasa_device_1
-    name: "Heat DHW until this temperature"
+    name: "Requested flow temperature"
   - platform: samsung_nasa
     message: 0x4204
     nasa_device_id: nasa_device_1
-    name: "Water Out TW2"
+    name: "Modified current temperature"
   - platform: samsung_nasa
     message: 0x4205
     nasa_device_id: nasa_device_1
@@ -237,7 +237,7 @@ sensor:
   - platform: samsung_nasa
     message: 0x4426
     nasa_device_id: nasa_device_1
-    name: "Heat pump produced energy (last minute)"
+    name: "Heat pump produced power (last minute)"
   - platform: samsung_nasa
     message: 0x4427
     nasa_device_id: nasa_device_1
@@ -254,14 +254,9 @@ sensor:
     message: 0x8061
     nasa_device_id: nasa_device_2
     name: "Defrost operation steps"
-  - platform: samsung_nasa
-    message: 0x8206
-    nasa_device_id: nasa_device_2
-    name: "High pressure"
-  - platform: samsung_nasa
-    message: 0x8208
-    nasa_device_id: nasa_device_2
-    name: "Low pressure"
+  # Not exposed: this unit sends a constant "no sensor" value for 0x8206 (high pressure) and
+  # 0x8208 (low pressure): 65535, which would show as ~642679 kPa, and for 0x82DF / 0x82E0
+  # (TW1 / TW2): 65036, which would show as -50 degC. See catalog/unused.md.
   - platform: samsung_nasa
     message: 0x820A
     nasa_device_id: nasa_device_2
@@ -330,14 +325,6 @@ sensor:
     message: 0x82A0
     nasa_device_id: nasa_device_2
     name: "Low pressure saturation temperature"
-  - platform: samsung_nasa
-    message: 0x82DF
-    nasa_device_id: nasa_device_2
-    name: "TW1 sensor reading"
-  - platform: samsung_nasa
-    message: 0x82E0
-    nasa_device_id: nasa_device_2
-    name: "TW2 sensor reading"
   - platform: samsung_nasa
     message: 0x8411
     nasa_device_id: nasa_device_2
@@ -604,15 +591,15 @@ select:
   - platform: samsung_nasa
     message: 0x4095
     nasa_device_id: nasa_device_1
-    name: "FSV 2091 Remote controller type zone 1"
+    name: "FSV 2091 External room thermostat 1"
   - platform: samsung_nasa
     message: 0x4096
     nasa_device_id: nasa_device_1
-    name: "FSV 2092 Remote controller type zone 2"
+    name: "FSV 2092 External room thermostat 2"
   - platform: samsung_nasa
     message: 0x4127
     nasa_device_id: nasa_device_1
-    name: "FSV 2093 Remote controller type zone 3"
+    name: "FSV 2093 Remote controller room temp control"
   - platform: samsung_nasa
     message: 0x4097
     nasa_device_id: nasa_device_1
@@ -674,11 +661,11 @@ switch:
   - platform: samsung_nasa
     message: 0x411A
     nasa_device_id: nasa_device_1
-    name: "FSV 4061 Remote controller option"
+    name: "FSV 4061 Additional zone control"
   - platform: samsung_nasa
     message: 0x4128
     nasa_device_id: nasa_device_1
-    name: "FSV 5022 Economic DHW mode"
+    name: "FSV 5022 DHW saving mode"
 
 
 text_sensor:
@@ -698,7 +685,7 @@ text_sensor:
   - platform: samsung_nasa
     message: 0x8000
     nasa_device_id: nasa_device_2
-    name: "Indoor unit defrost operation steps (text)"
+    name: "Outdoor unit service modes (text)"
   - platform: samsung_nasa
     message: 0x8001
     nasa_device_id: nasa_device_2

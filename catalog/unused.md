@@ -4,7 +4,7 @@ Ten plik **nie opisuje używanych encji** – służy do decyzji, co jeszcze war
 
 ## A. Widziane na magistrali w logu 08.10.2026, bez encji
 
-Kolumna „Nazwa NASA" to nazwa z listy kodów ([`samsung_nasa_protocol.md`](../samsung_nasa_protocol.md)); `??` znaczy, że nazwa nie jest znana. Interpretacje to hipotezy (**W**).
+Kolumna „Nazwa NASA" to nazwa z listy kodów ([`samsung_nasa_protocol.md`](../samsung_nasa_protocol.md)); `??` znaczy, że nazwa nie jest znana. Interpretacje to hipotezy (**W**). Wiersze z adnotacją „usunięta z YAML" to encje świadomie wycofane, bo ten model nie dostarcza danych.
 
 | ID | Nazwa NASA | Wartości w logu | Uwagi i hipoteza |
 |---|---|---|---|
@@ -20,6 +20,10 @@ Kolumna „Nazwa NASA" to nazwa z listy kodów ([`samsung_nasa_protocol.md`](../
 | `0x8247`<br>OUT | `NASA_OUTDOOR_DEFROST_STEP` | 0 | Krok odszraniania po stronie jednostki zewnętrznej (porównaj `0x8061`). |
 | `0x800D`<br>OUT | `ENUM_OUT_STATE_FAN_OPER` | 0 → 1 o 21:49:25 | Wentylator jednostki zewnętrznej w pracy. Jest gotowy w komponencie jako `text_sensor`, ale nie dodany do YAML. |
 | `0x82DE`<br>OUT | `NASA_OUTDOOR_EVA_IN` | 65036 (−50 °C) | Gotowy `sensor` w komponencie; ten model nie dostarcza wartości – nie ma sensu go dodawać. |
+| `0x8206`<br>OUT | `VAR_OUT_SENSOR_HIGHPRESS` | 65535 | Ciśnienie po stronie tłoczenia. Encja `High pressure` **usunięta z YAML 08.10.2026**: model nie raportuje (0xFFFF = brak czujnika), po przeliczeniu (× 9,80665) w HA wychodziło ≈ 642 679 kPa. Wracaj do niej tylko, gdy jednostka zacznie wysyłać realne wartości. Błędy 291/407/507 dotyczą wysokiego ciśnienia. |
+| `0x8208`<br>OUT | `VAR_OUT_SENSOR_LOWPRESS` | 65535 | Ciśnienie po stronie ssania. Encja `Low pressure` **usunięta z YAML 08.10.2026** z tego samego powodu co `0x8206`. Błędy 296/410/443 dotyczą niskiego ciśnienia. |
+| `0x82DF`<br>OUT | `VAR_OUT_SENSOR_TW1` | 65036 (−50 °C) | Temperatura wody „TW1" z jednostki zewnętrznej (protokół: `Water In 1 for EHS`). Encja `TW1 sensor reading` **usunięta z YAML 08.10.2026**: stała 65036 = −50 °C. README forka podaje, że na innych modelach jest równa `0x4238` (wylot), choć nazwa z protokołu sugeruje wlot – numeracja TW1/TW2 bywa niespójna. Użyj `0x4236`/`0x4238`. |
+| `0x82E0`<br>OUT | `VAR_OUT_SENSOR_TW2` | 65036 (−50 °C) | Temperatura wody „TW2" z jednostki zewnętrznej (protokół: `Water In 2 for EHS`). Encja `TW2 sensor reading` **usunięta z YAML 08.10.2026** z tego samego powodu co `0x82DF` (README forka: na innych modelach równa `0x4236`, czyli powrotowi). |
 
 Inne nieopisane komunikaty, które zmieniły się przy starcie sprężarki: `0x8032` (255 → 18), `0x8033` (0 → 1), `0x805E` (0 → 1), `0x4401` (15 → 93), `0x8239` (95 → 56). Bez dokumentacji nie warto ich wystawiać.
 

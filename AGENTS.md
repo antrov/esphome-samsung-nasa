@@ -21,7 +21,7 @@ How:
 4. Run `python3 tools/check_catalog.py` - it must print `catalog OK` (exit code 0). It checks that every message and entity in the YAML has a row, that no stale rows remain, and that rows have six columns and valid tags.
 5. Mention the catalogue update in the commit message.
 
-Do not rename existing entities: their names determine Home Assistant `unique_id`s (see `MIGRATION.md`).
+Entity names determine Home Assistant `unique_id`s (see `MIGRATION.md`). Never rename the 14 migrated entities from the mapping table in `MIGRATION.md`. Rename any other entity only for a good reason (e.g. the name is wrong in meaning), list every rename (old name, new name, reason) in the "Zmiany po migracji" section of `MIGRATION.md`, and keep the old name in the catalogue row as "Wcześniej `…`" (outside the "Encja" cell, which must contain only current names).
 
 ## Other conventions
 

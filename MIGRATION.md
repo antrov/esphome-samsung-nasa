@@ -46,6 +46,26 @@ Czego nie przenoszę: w `esphome_samsung_hvac_bus.yaml` urządzenie `20.00.00` m
 - **Konfiguracja ESPHome.** `api: password` i `ota: password` (puste) usunięte. Bez klucza szyfrowania HA nie prosi o ponowne uwierzytelnienie. Wymagane ESPHome ≥ 2026.5. Komponent `samsung_ac` z `main` nie ładuje się na ESPHome 2026.x (`number.NUMBER_SCHEMA` usunięte).
 - **Debug.** `debug_log_messages` i `debug_log_undefined_messages` zostały `true`, jak w Twoim pliku. `non_nasa_keepalive` nie istnieje (ten komponent obsługuje tylko NASA).
 
+## Zmiany po migracji (08.10.2026)
+
+Dotyczą wyłącznie encji dodanych **po** migracji (z tabel README i z logu magistrali). 14 encji z tabeli „Mapowanie encji" nie ruszałem, więc ich `unique_id` i historia w HA pozostają bez zmian.
+
+**Zmienione nazwy.** Zmiana nazwy = nowy `unique_id`: HA utworzy nową encję (z nowym `entity_id`), a starą pokaże jako niedostępną, wraz z jej dotychczasową historią. Starą usuń ręcznie (*Ustawienia → Urządzenia i usługi → Encje*), a automatyzacje i dashboardy przepnij na nową.
+
+| Platforma | Wiadomość | Stara nazwa | Nowa nazwa | Dlaczego |
+|---|---|---|---|---|
+| sensor | `0x4202` | `Heat DHW until this temperature` | `Requested flow temperature` | w logu to bieżący cel temperatury wylotu (strefa 1: 32,5 °C, strefa 2: 35,5 °C, ładowanie CWU: 70 °C), nie cel zasobnika |
+| sensor | `0x4204` | `Water Out TW2` | `Modified current temperature` | wartość nie jest wylotem z wymiennika; nowa nazwa zgodna z protokołem (`NASA_MODIFIED_CURRENT_TEMP`) |
+| sensor | `0x4426` | `Heat pump produced energy (last minute)` | `Heat pump produced power (last minute)` | jednostką jest wat, nie kWh |
+| select | `0x4095` | `FSV 2091 Remote controller type zone 1` | `FSV 2091 External room thermostat 1` | w instrukcji: zewnętrzny termostat pokojowy, zacisk #1 |
+| select | `0x4096` | `FSV 2092 Remote controller type zone 2` | `FSV 2092 External room thermostat 2` | j.w., zacisk #2 |
+| select | `0x4127` | `FSV 2093 Remote controller type zone 3` | `FSV 2093 Remote controller room temp control` | w instrukcji: sterowanie temperaturą pokojową czujnikiem sterownika (to nie trzecia strefa) |
+| switch | `0x411A` | `FSV 4061 Remote controller option` | `FSV 4061 Additional zone control` | w instrukcji: funkcja dodatkowej strefy (2 strefy) |
+| switch | `0x4128` | `FSV 5022 Economic DHW mode` | `FSV 5022 DHW saving mode` | w instrukcji: DHW Saving Mode; stara nazwa myliła się z trybem Economic z `0x4066` |
+| text_sensor | `0x8000` | `Indoor unit defrost operation steps (text)` | `Outdoor unit service modes (text)` | to tryby serwisowe, nie etapy odszraniania (te raportuje `0x8061`) |
+
+**Usunięte encje.** Jednostka wysyła dla nich stałą „brak czujnika", więc w HA wychodziły wartości absurdalne: `High pressure` (`0x8206`) i `Low pressure` (`0x8208`) – 65535, czyli ok. 642 679 kPa; `TW1 sensor reading` (`0x82DF`) i `TW2 sensor reading` (`0x82E0`) – 65036, czyli −50 °C. Po wgraniu usuń je w HA (będą niedostępne). Opisy i powód: [`catalog/unused.md`](catalog/unused.md).
+
 ## Co sprawdziłem
 
 - `esphome config` na ESPHome 2026.6.5: konfiguracja jest poprawna.
