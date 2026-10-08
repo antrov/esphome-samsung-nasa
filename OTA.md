@@ -12,7 +12,7 @@ Instrukcja przejścia z firmware `samsung_ac` na `samsung_nasa` bez rozkręcania
 
 ## Wariant A: dodatek ESPHome w Home Assistant
 
-1. W dodatku ESPHome utwórz nową konfigurację i wklej zawartość `samsung_hvac.yaml`. Komponent pobierze się sam z GitHuba (`ref: claude/bold-tesla-l2fjw5`). Po zmergowaniu PR zmień `ref` na `main`.
+1. W dodatku ESPHome utwórz nową konfigurację i wklej zawartość `samsung_hvac.yaml`. Komponent pobierze się sam z GitHuba (domyślna gałąź repozytorium).
 2. W `secrets.yaml` dodatku wpisz `wifi_ssid` i `wifi_password`.
 3. Kliknij **Validate**. Ma być „Configuration is valid”.
 4. Kliknij **Install → Wirelessly**. Pierwsza kompilacja trwa kilka minut.

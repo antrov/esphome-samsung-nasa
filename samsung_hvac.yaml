@@ -21,7 +21,6 @@ external_components:
   - source:
       type: git
       url: https://github.com/antrov/esphome-samsung-nasa
-      ref: claude/bold-tesla-l2fjw5
     components: [samsung_nasa]
 
 # [Optional] - Create web interface where you can control the heat pump from your web browser
