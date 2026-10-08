@@ -53,8 +53,23 @@ def validate(config):
     config[NASA_MODE] = nasa_select[NASA_MODE]
     config[NASA_TYPE] = "select"
     entries = nasa_select[CONF_DEFAULTS]() | nasa_select[CONF_DATA]()
+    user_options = config.get(CONF_OPTIONS)
     for key, value in entries.items():
         config[key] = value
+    if user_options is not None:
+        # The option labels can be renamed (e.g. to keep the labels Home Assistant
+        # history and automations already use). The position of an option is the
+        # value sent to the unit, so the number of options must not change.
+        user_options = cv.ensure_list(cv.string_strict)(user_options)
+        if len(user_options) != len(entries[CONF_OPTIONS]):
+            raise cv.Invalid(
+                "Message {} has {} options ({}); 'options' must list the same number of labels, in the same order".format(
+                    config[NASA_MESSAGE], len(entries[CONF_OPTIONS]), ", ".join(entries[CONF_OPTIONS])
+                )
+            )
+        if len(set(user_options)) != len(user_options):
+            raise cv.Invalid("Select options must be unique")
+        config[CONF_OPTIONS] = user_options
     if (nasa_lambda_from := config.get(NASA_LAMBDA_FROM)) is not None:
          config[NASA_LAMBDA_FROM] = Lambda(nasa_lambda_from)
     if (nasa_lambda_to := config.get(NASA_LAMBDA_TO)) is not None:

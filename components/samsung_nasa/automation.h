@@ -3,14 +3,26 @@
 #include "esphome/core/automation.h"
 #include "esphome/core/log.h"
 #include "nasa_base.h"
-#include "switch/nasa_switch.h"
-#include "select/nasa_select.h"
-#include "number/nasa_number.h"
 #include "nasa_controller.h"
 #include <vector>
 #include <functional>
 #include <algorithm>
 #include <initializer_list>
+
+// ESPHome copies only the platform folders that are used in the YAML, so each
+// platform header may be missing from the build.
+#if __has_include("switch/nasa_switch.h")
+#include "switch/nasa_switch.h"
+#define NASA_AUTOMATION_HAS_SWITCH
+#endif
+#if __has_include("select/nasa_select.h")
+#include "select/nasa_select.h"
+#define NASA_AUTOMATION_HAS_SELECT
+#endif
+#if __has_include("number/nasa_number.h")
+#include "number/nasa_number.h"
+#define NASA_AUTOMATION_HAS_NUMBER
+#endif
 
 namespace esphome {
 namespace samsung_nasa {
@@ -44,6 +56,7 @@ template<typename... Ts> class NASA_Request_Write_Action : public Action<Ts...> 
  public:
   explicit NASA_Request_Write_Action(NASA_Controller *controller) : controller_(controller) {}
 
+#ifdef NASA_AUTOMATION_HAS_SWITCH
   void add_write(NASA_Switch *obj, TemplatableValue<bool, Ts...> value) {
     actions_.push_back([obj, value](const Ts &...x) {
       bool val = value.value(x...);
@@ -53,7 +66,9 @@ template<typename... Ts> class NASA_Request_Write_Action : public Action<Ts...> 
       if (val) obj->turn_on(); else obj->turn_off();
     });
   }
+#endif
 
+#ifdef NASA_AUTOMATION_HAS_NUMBER
   void add_write(NASA_Number *obj, TemplatableValue<float, Ts...> value) {
     actions_.push_back([obj, value](const Ts &...x) {
       float val = value.value(x...);
@@ -69,7 +84,9 @@ template<typename... Ts> class NASA_Request_Write_Action : public Action<Ts...> 
       call.perform();
     });
   }
+#endif
 
+#ifdef NASA_AUTOMATION_HAS_SELECT
   void add_write(NASA_Select *obj, TemplatableValue<std::string, Ts...> value) {
     actions_.push_back([obj, value](const Ts &...x) {
       std::string val = value.value(x...);
@@ -85,6 +102,7 @@ template<typename... Ts> class NASA_Request_Write_Action : public Action<Ts...> 
       call.perform();
     });
   }
+#endif
 
   void play(const Ts &...x) override {
     for (auto &action : actions_) {

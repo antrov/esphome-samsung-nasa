@@ -23,6 +23,55 @@ All commands, and FSVs are implemented as standard ESPHome components (e.g., num
 
 **NB**: When assigning a nasa device to a samsung_nasa platform component make sure you assign the correct indoor/outdoor unit. The easiest way to check is by looking at the NASA Label information in the tables below. If the label says VAR_IN_... or ENUM_IN_... then the status is reported from the indoor unit. If the label says VAR_OUT_..., LVAR_OUT_... or ENUM_OUT..., then the status is reported from the outdoor unit.
 
+## Setup on macOS (ESPHome CLI)
+
+Requires [Homebrew](https://brew.sh). ESPHome 2026.5 or newer is needed.
+
+```bash
+# Python and git
+brew install python@3.12 git
+
+# ESPHome in an isolated virtual environment
+python3.12 -m venv ~/esphome-venv
+source ~/esphome-venv/bin/activate
+pip install --upgrade pip
+pip install "esphome>=2026.5"
+
+# Get the configuration
+git clone https://github.com/antrov/esphome-samsung-nasa
+cd esphome-samsung-nasa
+cp secrets.yaml.example secrets.yaml      # then fill in wifi_ssid and wifi_password
+
+# Validate, build and flash
+esphome config samsung_hvac.yaml
+esphome run samsung_hvac.yaml --device <DEVICE_IP>     # over the air
+ls /dev/cu.*                                           # find the serial port for a USB flash
+esphome run samsung_hvac.yaml --device /dev/cu.usbserial-XXXX
+esphome logs samsung_hvac.yaml --device <DEVICE_IP>
+```
+
+In a new terminal run `source ~/esphome-venv/bin/activate` again before using `esphome`.
+
+### Alternative: uvx (no manual virtual environment)
+
+[uv](https://docs.astral.sh/uv/) downloads a suitable Python and runs ESPHome in a cached, isolated environment:
+
+```bash
+brew install uv git
+
+git clone https://github.com/antrov/esphome-samsung-nasa
+cd esphome-samsung-nasa
+cp secrets.yaml.example secrets.yaml      # then fill in wifi_ssid and wifi_password
+
+uvx --python 3.12 --from "esphome>=2026.5" esphome config samsung_hvac.yaml
+uvx --python 3.12 --from "esphome>=2026.5" esphome run samsung_hvac.yaml --device <DEVICE_IP>
+uvx --python 3.12 --from "esphome>=2026.5" esphome logs samsung_hvac.yaml --device <DEVICE_IP>
+```
+
+To keep the commands short, define `alias esphome='uvx --python 3.12 --from "esphome>=2026.5" esphome'` in `~/.zshrc`, or install it once with `uv tool install --python 3.12 "esphome>=2026.5"` and call `esphome` directly.
+
+See [OTA.md](OTA.md) for updating a running device and for recovery.
+
 ## Compilation Using Arduino or ESP-IDF
 
 Using the Arduino framework will result in faster compilation time but less efficient RAM usage and larger firmware size.
@@ -180,6 +229,17 @@ So for example message 0x4066 (hot water mode):
     ),
     CONF_DEFAULTS: select_defaults()
 }
+```
+
+The option labels can be renamed with `options`, for example to keep the labels that Home Assistant history and automations already use. The list must have the same number of unique labels, in the same order, because the position of an option is the value sent to the unit:
+
+```yaml
+select:
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: Hot Water Mode
+    options: ["Eco", "Standard", "Power", "Force"]
 ```
 
 ### Supported Commands  
