@@ -1,0 +1,90 @@
+# Ustawienia serwisowe FSV (Field Setting Values)
+
+FSV to parametry instalacyjne zapisane w jednostce (limity nastaw, krzywa grzewcza, logika CWU, strefy, tryb wyjazdu). Normalnie ustawia je instalator w menu serwisowym sterownika przewodowego (wejście przez menu *Option* → tryb instalacyjny/serwisowy; hasło podano w instrukcji, str. 16). Komponent wystawia je jako encje o kategorii *config* (w HA domyślnie poza głównym widokiem). Legenda kolumn i tagów źródeł: [`README.md`](README.md).
+
+> **Uwagi praktyczne**
+> - FSV zmieniają **zabezpieczenia i logikę instalacji** (temperatury, grzałki, priorytety). Zapis z HA działa jak zapis ze sterownika – zmieniaj świadomie i zapisz poprzednią wartość.
+> - Po zmianie **FSV 3041–3046** (dezynfekcja) i **5011–5019** (tryb wyjazdu) instrukcja nakazuje **zresetować zasilanie** jednostki.
+> - Komponent odczytuje FSV przy starcie (żądanie odczytu dla każdej skonfigurowanej encji), a potem na bieżąco, gdy jednostka je roześle.
+> - **Domyślne** i zakresy w tabelach: instrukcja MIM-E03EN, kolumna *MIM-E03CN / MIM-E03EN / AE\*\*\*CXYB\*G*. Zakresy w polach *number* (K) mogą być węższe/szersze niż w instrukcji (np. FSV 1031: komponent 37–65, instrukcja 37–65/70/75 zależnie od jednostki zewnętrznej).
+> - „log" = wartość odczytana z magistrali 08.10.2026 (migawka ustawień instalacji). Wartości inne niż domyślne zaznaczono słowem *zmieniona*.
+> - Nazwy encji FSV w YAML są skrótami; w instrukcji ustawienia nazywają się inaczej (zob. kolumna „Co to jest").
+> - FSV, które nie mają encji (np. 2011–2072 krzywa grzewcza, 4011–4054, 4062/4063, 5041–5094), są wyliczone w [`unused.md`](unused.md).
+
+## 10xx – Limity zakresu nastaw użytkownika
+
+Ograniczają, jaką temperaturę może ustawić użytkownik na sterowniku (i pompa zaakceptować z HA). Nie zmieniają krzywej grzewczej, tylko „sufit i podłogę" nastaw.
+
+| ID | Encja | Wartości | Co to jest | Na co wpływa, uwagi | Źr. |
+|---|---|---|---|---|---|
+| `0x424A`<br>IN | `FSV 1011 Cooling water out max` *(number)* | °C, krok 1 · zakres 18–25 · domyślnie 25<br>log: **18,0** (*zmieniona*) | Górna granica nastawy temperatury wody przy chłodzeniu (Water Out Temperature for Cooling – Max). | Zawęża nastawy chłodzenia z góry: woda chłodząca nie będzie cieplejsza niż ta wartość. Dotyczy `0x4247`/`0x42D7` w trybie Cool. | M P K L |
+| `0x424B`<br>IN | `FSV 1012 Cooling water out min` *(number)* | °C, krok 1 · zakres 5–18 · domyślnie 16<br>log: **5,0** (*zmieniona*) | Dolna granica nastawy temperatury wody przy chłodzeniu (Min). | Im niżej, tym zimniejsza woda i głębsze chłodzenie, ale rośnie ryzyko kondensacji na podłogówce (instrukcja: nie schodzić poniżej 16 °C w krzywej WL1 przy chłodzeniu podłogowym). | M P K L |
+| `0x424C`<br>IN | `FSV 1021 Cooling room max` *(number)* | °C, krok 1 · zakres 28–30 · domyślnie 30<br>log: **28,0** (*zmieniona*) | Górna granica nastawy temperatury pomieszczenia przy chłodzeniu (Room Temperature for Cooling – Max). | Ogranicza `0x4201`/`0x42D6` w trybie Cool (dla odniesienia „Indoor Temp"). | M P K L |
+| `0x424D`<br>IN | `FSV 1022 Cooling room min` *(number)* | °C, krok 1 · zakres 18–28 · domyślnie 18<br>log: **18,0** | Dolna granica nastawy temperatury pomieszczenia przy chłodzeniu. | Jak wyżej – dolny koniec zakresu. | M P K L |
+| `0x424E`<br>IN | `FSV 1031 Heating water out max` *(number)* | °C, krok 1 · zakres 37–65 (instrukcja: 37–65/70/75 zależnie od jednostki) · domyślnie 65/70/75<br>log: **37,0** (*zmieniona – najniższa dozwolona*) | Górna granica nastawy temperatury wody grzewczej (Water Out Temperature for Heating – Max). | Twardy sufit dla `0x4247`/`0x42D7` w trybie Heat. Tu ustawiony na minimum, czyli woda grzewcza nie przekroczy 37 °C – typowa ochrona podłogówki i tryb niskotemperaturowy (wysokie COP). Podniesienie zwiększa moc w mrozy kosztem COP i ryzyka przegrzania podłogówki. | M P K L |
+| `0x424F`<br>IN | `FSV 1032 Heating water out min` *(number)* | °C, krok 1 · zakres 15–37 · domyślnie 25<br>log: **19,0** (*zmieniona*) | Dolna granica nastawy temperatury wody grzewczej (Min). | Niżej niż ta wartość nie ustawisz wody w trybie Heat; niska wartość pozwala na bardzo łagodne grzanie w cieple dni. | M P K L |
+| `0x4250`<br>IN | `FSV 1041 Heating room max` *(number)* | °C, krok 1 · zakres 18–30 · domyślnie 30<br>log: **30,0** | Górna granica nastawy temperatury pomieszczenia przy grzaniu. | Ogranicza `0x4201`/`0x42D6` (dla odniesienia „Indoor Temp"). | M P K L |
+| `0x4251`<br>IN | `FSV 1042 Heating room min` *(number)* | °C, krok 1 · zakres 16–18 · domyślnie 16<br>log: **16,0** | Dolna granica nastawy temperatury pomieszczenia przy grzaniu. | Jak wyżej – dolny koniec zakresu. | M P K L |
+| `0x4252`<br>IN | `FSV 1051 DHW max temperature` *(number)* | °C, krok 1 · zakres 50–70 · domyślnie 55/63/70 (zależnie od jednostki)<br>log: **55,0** | Górna granica nastawy temperatury zasobnika CWU (DHW tank – Max). | Ogranicza `0x4235`: użytkownik nie ustawi wyższej niż ta wartość (tu cel 55 °C jest na limicie). Powyżej FSV 3021 grzeje już tylko grzałka booster. | M P K L |
+| `0x4253`<br>IN | `FSV 1052 DHW min temperature` *(number)* | °C, krok 1 · zakres 30–40 · domyślnie 40<br>log: **40,0** | Dolna granica nastawy temperatury zasobnika CWU (Min). | Ogranicza `0x4235` od dołu. | M P K L |
+
+## 20xx – Termostaty i sterowanie temperaturą pokojową
+
+Krzywa grzewcza (2011–2081) nie ma jeszcze encji – patrz [`unused.md`](unused.md).
+
+| ID | Encja | Wartości | Co to jest | Na co wpływa, uwagi | Źr. |
+|---|---|---|---|---|---|
+| `0x4095`<br>IN | `FSV 2091 External room thermostat 1` *(select)* | 0 None · 1 Thermostat On/Off Only · 2–4 Thermostat On/Off + WL #1/#2/#3 · domyślnie 0<br>log: **None (0)** | W instrukcji: zewnętrzny termostat pokojowy, zacisk #1 (podłogówka). Wcześniej `FSV 2091 Remote controller type zone 1` (nazwa z komponentu, myląca). | Przy ≠ 0 o pracy sprężarki decyduje zewnętrzny termostat, nie sterownik. 1 = sprężarka tylko wg termostatu; 2–4 = wg termostatu **albo** wody z krzywej grzewczej, a po wyłączeniu krzywą pompa obiegowa: 2 wył., 3 wł., 4 cyklicznie 7 min wył./3 min wł. (etykiety „WL #1/#2/#3" w komponencie to te trzy warianty). Sterowanie ze sterownika (jak teraz) wymaga 0 w obu FSV 2091 i 2092. | M P K L |
+| `0x4096`<br>IN | `FSV 2092 External room thermostat 2` *(select)* | jak wyżej · domyślnie 0<br>log: **None (0)** | W instrukcji: zewnętrzny termostat pokojowy, zacisk #2 (FCU/grzejniki). Wcześniej `FSV 2092 Remote controller type zone 2`. | Jak FSV 2091 dla drugiego zacisku. Termostat #2 ma priorytet w wyborze trybu i temperatury wody. | M P K L |
+| `0x4127`<br>IN | `FSV 2093 Remote controller room temp control` *(select)* | Thermostat On/Off Only (1) · + WL #1 (2) · + WL #2 (3) · + WL #3 (4) · domyślnie 4 (komponent przesuwa surowe 1–4 o 1)<br>log: **WL #3 (surowo 4)** | W instrukcji: sterowanie temperaturą pomieszczenia czujnikiem sterownika (Remote Controller Room Temp. Control). Wcześniej `FSV 2093 Remote controller type zone 3` (mylące „zone 3" – to nie trzecia strefa). | 1 = sprężarka włącza/wyłącza się wyłącznie wg czujnika pokojowego; 2–4 = wg czujnika albo wg wody z krzywej; po wyłączeniu krzywą pompa: 2 wył., 3 wł., 4 cyklicznie 7 min wył./3 min wł. Dotyczy zachowania pompy obiegowej po osiągnięciu celu. | M P K L |
+
+## 30xx – CWU (zasobnik)
+
+Opis działania: [`dhw.md`](dhw.md).
+
+| ID | Encja | Wartości | Co to jest | Na co wpływa, uwagi | Źr. |
+|---|---|---|---|---|---|
+| `0x4097`<br>IN | `FSV 3011 DHW enable` *(select)* | 0 Off · 1 Thermo (On) #1 · 2 Thermo (Off) #2 · domyślnie 0<br>log: **Thermo (On) #1 (1)** (*zmieniona – CWU włączona*) | Aktywacja funkcji CWU (DHW mode activate). | Musi być 1 lub 2, by CWU działała. 1 = grzanie startuje wg progu *thermo ON*, 2 = wg progu *thermo OFF* (rusza wcześniej). Wymaga czujnika zasobnika. | M P K L |
+| `0x4260`<br>IN | `FSV 3021 DHW heat pump max temperature` *(number)* | °C, krok 1 · zakres 45–65 (instrukcja: 45–55/63/70) · domyślnie 55/63/70<br>log: brak próbek | Maksymalna temperatura zasobnika osiągana samą pompą ciepła (Heat Pump – Max Temp.). | Powyżej tej wartości zasobnik dogrzewa tylko grzałka booster. Im wyżej, tym więcej pracy sprężarki przy niższym COP. | M P K |
+| `0x4261`<br>IN | `FSV 3022 DHW heat pump stop` *(number)* | °C, krok 1 · zakres 0–10 · domyślnie 2<br>log: brak próbek | Różnica ponad nastawę, przy której pompa kończy grzanie CWU (Heat Pump – Stop). | Wyłączenie pompy przy cel + ta różnica. Większa = zasobnik nagrzewa się wyżej ponad cel, ale rzadziej się włącza. | M P K |
+| `0x4262`<br>IN | `FSV 3023 DHW heat pump start` *(number)* | °C, krok 1 · zakres 5–30 · domyślnie 5<br>log: brak próbek | Różnica poniżej nastawy, przy której pompa zaczyna grzać CWU (Heat Pump – Start). | Start przy cel − ta różnica. Większa = rzadsze, głębsze cykle (mniej startów, ale większe wahania temperatury w zasobniku). | M P K |
+| `0x4263`<br>IN | `FSV 3024 DHW min space heating operation time` *(number)* | min, krok 1 · zakres 1–20 · domyślnie 5<br>log: brak próbek | Minimalny czas ogrzewania pomieszczeń między ładowaniami CWU (Min. Operating Time). | Działa tylko, gdy jednocześnie żądane jest ogrzewanie i CWU – gwarantuje ogrzewaniu minimum czasu pracy. | M P K |
+| `0x4264`<br>IN | `FSV 3025 DHW max operation time` *(number)* | min, krok 5 · zakres 5–95 · domyślnie 30<br>log: brak próbek | Maksymalny czas jednego ładowania CWU, gdy czeka ogrzewanie (Max. Operating Time). | Po upływie czasu układ wraca do ogrzewania, nawet jeśli zasobnik nie osiągnął celu. Przy samym żądaniu CWU limit nie działa. Powinien być większy niż FSV 3032. | M P K |
+| `0x4265`<br>IN | `FSV 3026 DHW max space heating operation time` *(number)* | godz., krok 0,5 · zakres 0,5–10 · domyślnie 3 (surowo w minutach, komponent dzieli przez 60)<br>log: brak próbek | Maksymalny czas ogrzewania pomieszczeń, gdy czeka CWU (Operation Interval). | Po upływie układ przełącza się na CWU. Z FSV 3025 tworzy naprzemienny cykl CWU/ogrzewanie. | M P K |
+| `0x4098`<br>IN | `FSV 3031 DHW booster heater` *(switch)* | 0 Off · 1 On · domyślnie 0 dla Control Kit (1 dla jednostek hydraulicznych R32)<br>log: brak próbek | Zezwolenie na użycie grzałki booster do CWU (Booster Heater On/Off). | Off = CWU tylko pompą ciepła; Power/Force/dezynfekcja nie użyją grzałki. Wymaga fizycznie zamontowanej grzałki i FSV 4022 uwzględniającego booster. | M P K |
+| `0x4266`<br>IN | `FSV 3032 DHW booster heater delay time` *(number)* | min, krok 5 · zakres 20–95 · domyślnie 20<br>log: brak próbek | Opóźnienie włączenia grzałki booster względem pompy ciepła. | Dłuższe opóźnienie = więcej CWU z pompy (taniej), ale wolniejsze nagrzewanie. W trybach Power/Force pomijane; w Economic grzałka nie pracuje. | M P K |
+| `0x4267`<br>IN | `FSV 3033 DHW booster heater overshoot` *(number)* | °C, krok 1 · zakres 0–4 · domyślnie 0<br>log: brak próbek | Nadwyżka temperatury, przy której grzałka booster się wyłącza (wyłączenie przy cel + wartość). | Włączenie grzałki następuje 2 °C niżej. Większa = zasobnik nagrzany wyżej, więcej prądu. | M P K |
+| `0x4099`<br>IN | `FSV 3041 DHW disinfection` *(switch)* | 0 Off · 1 On · domyślnie 1<br>log: **Off (0)** (*zmieniona*) | Włączenie cyklicznej dezynfekcji (termicznej) zasobnika. | Wyłączona w tej instalacji. Wariant z grzałką: dzień FSV 3042, start FSV 3043, cel FSV 3044 (70 °C), utrzymanie FSV 3045 (10 min). Wariant samą pompą R290 (FSV 3031 = 0): start 14:00, cel 60 °C, 60 min. Wymaga grzałki (poza modelami R290). Niewykonanie = błąd E919. Po zmianie – reset zasilania. | M P K L |
+| `0x409A`<br>IN | `FSV 3042 DHW disinfection day` *(select)* | Sunday (0) … Saturday (6) · All (7) · domyślnie Friday<br>log: **Friday (5)** | Dzień tygodnia dezynfekcji (Interval). | Ma znaczenie tylko przy włączonej dezynfekcji (FSV 3041). „All" = codziennie. Po zmianie – reset zasilania. | M P K L |
+| `0x4269`<br>IN | `FSV 3043 DHW disinfection start time` *(number)* | godz., krok 1 · zakres 0–23 · domyślnie 14 (23 według instrukcji dla AE\*\*\*RNW\*\*\*)<br>log: **23** | Godzina rozpoczęcia dezynfekcji (Start Time). | Wybierz porę poza typowym poborem CWU. Po zmianie – reset zasilania. | M P K L |
+| `0x426A`<br>IN | `FSV 3044 DHW disinfection target temperature` *(number)* | °C, krok 5 · zakres 40–70 · domyślnie 70<br>log: **70,0** | Docelowa temperatura dezynfekcji (Target Temp.). | Wysoka temperatura = skuteczniejsza dezynfekcja, ale praca grzałki; ryzyko oparzeń (zadbaj o zawór mieszający na wyjściu CWU). Po zmianie – reset zasilania. | M P K L |
+| `0x426B`<br>IN | `FSV 3045 DHW disinfection duration` *(number)* | min, krok 5 · zakres 5–60 · domyślnie 10<br>log: **10** | Czas utrzymania temperatury dezynfekcji (Duration). | Dłuższy = pewniejsza dezynfekcja, więcej energii. Po zmianie – reset zasilania. | M P K L |
+| `0x409B`<br>IN | `FSV 3051 DHW forced operation` *(switch)* | 0 No · 1 Yes · domyślnie 0<br>log: brak próbek | Włącza ograniczenie czasu trybu wymuszonego (Forced DHW Operation Timer OFF). | Gdy Yes, tryb Force wyłączy się sam po czasie z FSV 3052; domyślnie (No) trwa, dopóki go nie wyłączysz. | M P K |
+| `0x426C`<br>IN | `FSV 3052 DHW forced operation timer` *(number)* | min (surowo × 10 min), krok 10 · zakres 30–300 (instrukcja: 3–30 × 10 min) · domyślnie 60<br>log: brak próbek | Czas trwania trybu wymuszonego, jeśli FSV 3051 = Yes. | Po tym czasie CWU wraca do poprzedniego trybu. | M P K |
+| `0x409C`<br>IN | `FSV 3061 DHW thermostat` *(select)* | 0 No · 1 Solar + DHW · 2 DHW Thermostat · domyślnie 0<br>log: **No (0)** | Współpraca z panelem solarnym lub termostatem zasobnika (Solar Panel / DHW Combination Thermostat). | 1 = pompa i solar mogą działać jednocześnie; 2 = zewnętrzny termostat CWU. Zawory 2/3-drożne zamykają się z 1 min opóźnieniem, otwierają bez opóźnienia. | M P K L |
+| `0x409D`<br>IN | `FSV 3071 DHW 3-way valve direction` *(select)* | Room (0) · Tank (1) · domyślnie Room<br>log: brak próbek | Domyślny kierunek zaworu 3-drożnego (Default 3-way Valve Direction). | Określa położenie zaworu 3-drożnego domyślne (gdy nie jest sterowany); prawdopodobnie dopasowuje logikę do typu siłownika, a zły kierunek odwróciłby działanie c.o./CWU. Nie zmieniaj bez potrzeby. | M P K W |
+
+## 40xx – Strefy
+
+Pozostałe FSV 40xx (grzałka backup, kocioł, zawór mieszający, pompa inwerterowa) – [`unused.md`](unused.md).
+
+| ID | Encja | Wartości | Co to jest | Na co wpływa, uwagi | Źr. |
+|---|---|---|---|---|---|
+| `0x411A`<br>IN | `FSV 4061 Additional zone control` *(switch)* | 0 No · 1 Yes · domyślnie 0<br>log: **Yes (1)** (*zmieniona – 2 strefy aktywne*) | W instrukcji: aplikacja funkcji dodatkowej strefy (Addition Zone Control – Application). Wcześniej `FSV 4061 Remote controller option` (nazwa z komponentu, myląca). | Włącza sterowanie dwiema strefami ze sterownika przewodowego (strefa 1 i 2 z własnymi celami i zaworami). Wymaga FSV 2091 = 2092 = 0. Z zewnętrznym termostatem wyłącz (0). Instrukcja zastrzega, że kontrolery wyższego poziomu inne niż Wi-Fi Kit 2.0 i sterownik MWR-WW10\*\* nie obsługują 2 stref – przy łączeniu MWR-WW10\*\* z takim kontrolerem FSV 4061 trzeba wyłączyć. | M P K L |
+
+## 50xx – Tryb wyjazdu i CWU oszczędne
+
+Docelowe nastawy po włączeniu trybu wyjazdu (`0x406D`). **Po zmianie FSV 5011–5019 trzeba zresetować zasilanie.**
+
+| ID | Encja | Wartości | Co to jest | Na co wpływa, uwagi | Źr. |
+|---|---|---|---|---|---|
+| `0x4273`<br>IN | `FSV 5011 Outing water out cooling` *(number)* | °C, krok 1 · zakres 5–25 · domyślnie 25<br>log: **25,0** | Temperatura wody przy chłodzeniu w trybie wyjazdu. | Cel wylotu chłodzenia, gdy włączony Outing. | M P K L |
+| `0x4274`<br>IN | `FSV 5012 Outing room cooling` *(number)* | °C, krok 1 · zakres 18–30 · domyślnie 30<br>log: **30,0** | Temperatura pomieszczenia przy chłodzeniu w trybie wyjazdu. | Cel pokojowy chłodzenia w Outing. | M P K L |
+| `0x4275`<br>IN | `FSV 5013 Outing water out heating` *(number)* | °C, krok 1 · zakres 15–55 · domyślnie 15<br>log: **15,0** | Temperatura wody przy grzaniu w trybie wyjazdu. | Cel wylotu grzania w Outing – niska wartość = minimalne grzanie na czas nieobecności. | M P K L |
+| `0x4276`<br>IN | `FSV 5014 Outing room heating` *(number)* | °C, krok 1 · zakres 16–30 · domyślnie 16<br>log: **16,0** | Temperatura pomieszczenia przy grzaniu w trybie wyjazdu. | Cel pokojowy grzania w Outing (ochrona przed wychłodzeniem). | M P K L |
+| `0x4277`<br>IN | `FSV 5015 Outing water law cooling WL1` *(number)* | °C, krok 1 · zakres 5–25 · domyślnie 25<br>log: **25,0** | Nastawa krzywej chłodzenia WL1 (podłogówka) w trybie wyjazdu. | Zastępuje krzywą WL1 w trybie Outing. | M P K L |
+| `0x4278`<br>IN | `FSV 5016 Outing water law cooling WL2` *(number)* | °C, krok 1 · zakres 5–25 · domyślnie 25<br>log: **25,0** | Nastawa krzywej chłodzenia WL2 (FCU/grzejniki) w trybie wyjazdu. | Zastępuje krzywą WL2 w trybie Outing. | M P K L |
+| `0x4279`<br>IN | `FSV 5017 Outing water law heating WL1` *(number)* | °C, krok 1 · zakres 15–55 · domyślnie 15<br>log: **15,0** | Nastawa krzywej grzania WL1 (podłogówka) w trybie wyjazdu. | Zastępuje krzywą WL1 w trybie Outing. | M P K L |
+| `0x427A`<br>IN | `FSV 5018 Outing water law heating WL2` *(number)* | °C, krok 1 · zakres 15–55 · domyślnie 15<br>log: **15,0** | Nastawa krzywej grzania WL2 (FCU/grzejniki) w trybie wyjazdu. | Zastępuje krzywą WL2 w trybie Outing. | M P K L |
+| `0x427B`<br>IN | `FSV 5019 Outing DHW tank temperature` *(number)* | °C, krok 1 · zakres 30–70 · domyślnie 30<br>log: **30,0** | Temperatura zasobnika CWU w trybie wyjazdu. | Cel CWU, gdy włączony Outing (30 °C = praktycznie bez dogrzewania; rozważ ryzyko bakterii przy dłuższej nieobecności). | M P K L |
+| `0x4128`<br>IN | `FSV 5022 DHW saving mode` *(switch)* | 0 Off · 1 On · domyślnie 0<br>log: **Off (0)** | W instrukcji: DHW Saving Mode (tryb oszczędny CWU). Wcześniej `FSV 5022 Economic DHW mode` – nazwa łatwo mylona z trybem Economic z `0x4066`. | Dodatkowe oszczędzanie energii w trybie Economic CWU; temperaturę włączania w tym trybie ustawia FSV 5023 (`0x42F0`, brak encji), obniżkę celu FSV 5021 (`0x427C`, brak encji). | M P K L |
