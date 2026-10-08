@@ -6,6 +6,14 @@
 # the device name, the entity names and the platform of each entity are kept exactly as before.
 # Do not rename anything here without reading MIGRATION.md.
 
+substitutions:
+  # Hourly / daily COP: the least electricity (kWh) the outdoor unit must draw within the current
+  # hour / day before its COP is published; below that the COP is "unknown". An idle unit draws
+  # little (the lowest 0x8413 reading in the 2026-10-08 log was 15 W: ~0.015 kWh per hour, ~0.4 kWh
+  # per day), so an hour / day without real operation stays "unknown" instead of showing a COP of 0.
+  cop_min_kwh_hourly: "0.1"
+  cop_min_kwh_daily: "0.5"
+
 esphome:
   name: samsung_hvac
   friendly_name: Samsung HVAC
@@ -44,6 +52,14 @@ wifi:
   ap: {}
 
 captive_portal:
+
+# Clock for the hourly / daily COP (below): it decides when an hour or a day starts. No `timezone`
+# on purpose: the device then takes the time zone from Home Assistant (needs Home Assistant 2026.3
+# or newer; otherwise it keeps the time zone of the machine that built the firmware), so a day
+# starts at the same midnight as in Home Assistant.
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 # M5Atom Lite + ATOM Tail485 (board m5stack-atom). The Tail485 converter switches the RS485
 # direction by itself, so no flow_control_pin is needed. Pins: TX = G26, RX = G32.
@@ -85,6 +101,7 @@ sensor:
     message: 0x8414
     nasa_device_id: nasa_device_2
     name: "Outdoor Cumulative Energy"
+    id: heat_pump_cumulative_energy  # kWh counter used by the hourly / daily COP
   # was: outdoor_current
   - platform: samsung_nasa
     message: 0x8217
@@ -242,6 +259,7 @@ sensor:
     message: 0x4427
     nasa_device_id: nasa_device_1
     name: "Heat pump produced energy (total)"
+    id: heat_pump_produced_energy  # kWh counter used by the hourly / daily COP
   - platform: samsung_nasa
     message: 0x8000
     nasa_device_id: nasa_device_2
@@ -370,6 +388,29 @@ sensor:
     filters:
       - lambda: return (int16_t)x;
       - multiply: 0.1
+
+  # --- Calculated: COP of the current hour / day ---
+  # Heat produced (0x4427) divided by electricity consumed by the outdoor unit (0x8414), both
+  # counted from the start of the hour / day. Published by the `interval` block at the end of this
+  # file; "unknown" until the heat pump has used the energy set in `substitutions`.
+  - platform: template
+    id: cop_hourly
+    name: "COP - Hourly"
+    icon: mdi:chart-bar
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: never
+    filters:
+      - delta: 0.01
+  - platform: template
+    id: cop_daily
+    name: "COP - Daily"
+    icon: mdi:chart-bar
+    state_class: measurement
+    accuracy_decimals: 2
+    update_interval: never
+    filters:
+      - delta: 0.01
 
 binary_sensor:
   # Added in the fork's code
@@ -725,3 +766,72 @@ text_sensor:
     message: 0x8235
     nasa_device_id: nasa_device_2
     name: "Error description (text)"
+
+
+# --- COP of the current hour and day (published to "COP - Hourly" / "COP - Daily" above) ---
+# COP = heat produced / electricity consumed, from the lifetime counters 0x4427 and 0x8414.
+# Not integrated from the power readings, as the README examples do: the unit keeps counting while
+# the ESP is offline or misses a message, so a reboot or an OTA update does not lose any energy.
+# At the start of every hour / day the counters are stored as a baseline, and
+#   COP = (heat - heat0) / (elec - elec0)
+# The baseline is kept over reboots (restore_value). If the stored period is not the current one
+# any more (the device was off over the turn of the hour / day) a new period starts from the
+# current counters.
+globals:
+  - id: cop_hour_id  # UTC hour number the baseline belongs to
+    type: int
+    restore_value: true
+    initial_value: "-1"
+  - id: cop_hour_heat0  # 0x4427 [kWh] at the start of the hour
+    type: float
+    restore_value: true
+    initial_value: "NAN"
+  - id: cop_hour_elec0  # 0x8414 [kWh] at the start of the hour
+    type: float
+    restore_value: true
+    initial_value: "NAN"
+  - id: cop_day_id  # local date (year * 1000 + day of the year) the baseline belongs to
+    type: int
+    restore_value: true
+    initial_value: "-1"
+  - id: cop_day_heat0  # 0x4427 [kWh] at the start of the day
+    type: float
+    restore_value: true
+    initial_value: "NAN"
+  - id: cop_day_elec0  # 0x8414 [kWh] at the start of the day
+    type: float
+    restore_value: true
+    initial_value: "NAN"
+
+interval:
+  - interval: 60s
+    then:
+      - lambda: |-
+          auto now = id(homeassistant_time).now();
+          if (!now.is_valid()) return;  // clock not synchronised with Home Assistant yet
+          const float heat = id(heat_pump_produced_energy).state;    // kWh, lifetime
+          const float elec = id(heat_pump_cumulative_energy).state;  // kWh, lifetime
+          if (std::isnan(heat) || std::isnan(elec)) return;          // no data from the heat pump yet
+
+          // COP of the period `period` (any number that changes when the period changes). A new
+          // period, a missing baseline or a counter that went backwards (re)starts the baseline.
+          auto period_cop = [&](int period, int &stored, float &heat0, float &elec0, float min_kwh) -> float {
+            if (period != stored || std::isnan(heat0) || std::isnan(elec0) || heat < heat0 || elec < elec0) {
+              stored = period;
+              heat0 = heat;
+              elec0 = elec;
+              return NAN;
+            }
+            const float used = elec - elec0;
+            if (used < min_kwh) return NAN;  // the heat pump has not really run in this period yet
+            float cop = (heat - heat0) / used;
+            if (cop > 8.0f) cop = 8.0f;      // same limits as the README examples
+            if (cop < 0.0f) cop = 0.0f;
+            return cop;
+          };
+
+          // Hours are UTC hours: the same as local hours for time zones with a whole-hour offset.
+          id(cop_hourly).publish_state(period_cop(now.timestamp / 3600, id(cop_hour_id),
+              id(cop_hour_heat0), id(cop_hour_elec0), ${cop_min_kwh_hourly}));
+          id(cop_daily).publish_state(period_cop(now.year * 1000 + now.day_of_year, id(cop_day_id),
+              id(cop_day_heat0), id(cop_day_elec0), ${cop_min_kwh_daily}));

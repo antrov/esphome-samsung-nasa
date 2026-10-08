@@ -880,6 +880,16 @@ time:
 
 Thanks to [@mergwyn](https://github.com/mergwyn) for providing these examples.
 
+### Hourly and daily COP from the energy counters (this fork)
+
+The daily example above adds up the *power* readings, so the energy used while the ESP is offline (a reboot, an OTA update) or while it misses a message is lost, and it can only reset at midnight. This fork's [samsung_hvac.yaml](samsung_hvac.yaml) publishes `COP - Hourly` and `COP - Daily` another way: from the lifetime energy counters 0x4427 (heat produced) and 0x8414 (electricity consumed). At the start of every hour and every day the two counters are stored as a baseline, and the COP of the period so far is `(heat - heat at start) / (electricity - electricity at start)`. The heat pump keeps counting while the ESP is offline and the baseline is kept over reboots (`restore_value`), so nothing is lost.
+
+* The COP stays "unknown" until the outdoor unit has drawn at least 0.1 kWh in the hour (0.5 kWh in the day), so an idle hour does not show a COP of 0. Both limits are the `cop_min_kwh_hourly` / `cop_min_kwh_daily` substitutions.
+* A day starts at midnight in the time zone of Home Assistant: the `homeassistant` time source is used without `timezone` (this needs Home Assistant 2026.3 or newer, otherwise set `timezone`).
+* The value is limited to 0 - 8, as in the examples above, and it is the COP of the outdoor unit only: 0x8414 does not include the circulation pump or the heaters of the hydraulic module.
+
+To reuse it, copy the `substitutions`, `time`, `globals` and `interval` blocks and the two `COP` template sensors from `samsung_hvac.yaml`, and give the 0x4427 and 0x8414 sensors the ids `heat_pump_produced_energy` and `heat_pump_cumulative_energy`. More details (in Polish) are in [catalog/energy-diagnostics.md](catalog/energy-diagnostics.md).
+
 ## Home Assistant
 
 An example heat pump dashboard in Home Assistant using this component and the example.yaml.

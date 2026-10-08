@@ -13,13 +13,15 @@ Ten katalog opisuje **wszystko, co jest wystawione z pompy ciepła w `samsung_hv
 | [`dhw.md`](dhw.md) | Ciepła woda użytkowa (CWU): włączenie, tryb, temperatura zadana i w zasobniku, zawór 3-drożny, grzałka booster |
 | [`hydraulics.md`](hydraulics.md) | Temperatury wody (wlot, wylot, grzałka, zawór mieszający), przepływ, temperatury czynnika na wymienniku płytowym |
 | [`outdoor-unit.md`](outdoor-unit.md) | Jednostka zewnętrzna: stan pracy, sprężarka, zawory, defrost, czujniki obiegu chłodniczego, falownik, wentylator |
-| [`energy-diagnostics.md`](energy-diagnostics.md) | Moc i energia (pobór, produkcja ciepła, COP), napięcie i prąd, liczniki życia urządzenia, kody błędów |
+| [`energy-diagnostics.md`](energy-diagnostics.md) | Moc i energia (pobór, produkcja ciepła), wyliczane COP godzinowe i dzienne, napięcie i prąd, liczniki życia urządzenia, kody błędów |
 | [`fsv.md`](fsv.md) | Ustawienia serwisowe FSV wystawione w YAML (limity 10xx, termostaty 20xx, CWU 30xx, strefy 40xx, wyjazd 50xx) |
 | [`unused.md`](unused.md) | Czego **nie** ma w YAML: komunikaty widziane na magistrali, gotowe w komponencie FSV-y (kandydaci), ustawienia bez znanego komunikatu |
 
 ## Jak czytać tabele
 
 Każdy wiersz = **jeden komunikat NASA** (jedno ID). Jeśli ten sam komunikat jest wystawiony jako kilka encji (np. `0x4067` jako sensor, binary_sensor i text_sensor), wszystkie encje są wymienione w jednym wierszu.
+
+Wyjątek: czujniki **wyliczane w ESPHome** (`platform: template`, np. `COP - Hourly`) nie czytają żadnego komunikatu. Mają osobną tabelę „Czujniki wyliczane" w pliku tematycznym (w kolumnie ID stoi „wyliczany" i komunikaty, z których liczą), a `tools/check_catalog.py` ich nie sprawdza – ich opis trzeba aktualizować ręcznie.
 
 | Kolumna | Znaczenie |
 |---|---|

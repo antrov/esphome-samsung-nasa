@@ -66,6 +66,8 @@ Dotyczą wyłącznie encji dodanych **po** migracji (z tabel README i z logu mag
 
 **Usunięte encje.** Jednostka wysyła dla nich stałą „brak czujnika", więc w HA wychodziły wartości absurdalne: `High pressure` (`0x8206`) i `Low pressure` (`0x8208`) – 65535, czyli ok. 642 679 kPa; `TW1 sensor reading` (`0x82DF`) i `TW2 sensor reading` (`0x82E0`) – 65036, czyli −50 °C. Po wgraniu usuń je w HA (będą niedostępne). Opisy i powód: [`catalog/unused.md`](catalog/unused.md).
 
+**Dodane encje.** `COP - Hourly` i `COP - Daily` (sensory szablonowe: COP bieżącej godziny i doby, liczony z przyrostu liczników `0x4427` ÷ `0x8414`; opis: [`catalog/energy-diagnostics.md`](catalog/energy-diagnostics.md)). Do ich działania potrzebne są `id` na dwóch istniejących czujnikach (`Outdoor Cumulative Energy`, `Heat pump produced energy (total)`) i komponent `time`; żadna z tych zmian nie rusza nazw, więc `unique_id` dotychczasowych encji pozostają bez zmian. Sprawdzone: klucze wszystkich 137 dotychczasowych encji w wygenerowanym `main.cpp` (`esphome compile --only-generate`, ESPHome 2026.9.1) są identyczne jak przed zmianą.
+
 ## Co sprawdziłem
 
 - `esphome config` na ESPHome 2026.6.5: konfiguracja jest poprawna.
