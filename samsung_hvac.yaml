@@ -150,6 +150,200 @@ sensor:
     filters:
       - multiply: 0.1
 
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4002
+    nasa_device_id: nasa_device_1
+    name: "Current operation mode"
+  - platform: samsung_nasa
+    message: 0x4038
+    nasa_device_id: nasa_device_1
+    name: "Humidity (A/C units only)"
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "DHW valve"
+  - platform: samsung_nasa
+    message: 0x4069
+    nasa_device_id: nasa_device_1
+    name: "Zone 1 input signal from external stat"
+  - platform: samsung_nasa
+    message: 0x406A
+    nasa_device_id: nasa_device_1
+    name: "Zone 2 input signal from external stat"
+  - platform: samsung_nasa
+    message: 0x4089
+    nasa_device_id: nasa_device_1
+    name: "Water pump"
+  - platform: samsung_nasa
+    message: 0x408A
+    nasa_device_id: nasa_device_1
+    name: "Zone control valve status"
+  - platform: samsung_nasa
+    message: 0x40C4
+    nasa_device_id: nasa_device_1
+    name: "PWM Water Pump Status"
+  - platform: samsung_nasa
+    message: 0x4202
+    nasa_device_id: nasa_device_1
+    name: "Heat DHW until this temperature"
+  - platform: samsung_nasa
+    message: 0x4204
+    nasa_device_id: nasa_device_1
+    name: "Water Out TW2"
+  - platform: samsung_nasa
+    message: 0x4205
+    nasa_device_id: nasa_device_1
+    name: "EVA return temperature"
+  - platform: samsung_nasa
+    message: 0x4206
+    nasa_device_id: nasa_device_1
+    name: "EVA flow temperature"
+  - platform: samsung_nasa
+    message: 0x4236
+    nasa_device_id: nasa_device_1
+    name: "Flow return temperature"
+  - platform: samsung_nasa
+    message: 0x4238
+    nasa_device_id: nasa_device_1
+    name: "Flow temperature"
+  - platform: samsung_nasa
+    message: 0x4203
+    nasa_device_id: nasa_device_1
+    name: "Zone 1 room temperature"
+  - platform: samsung_nasa
+    message: 0x427F
+    nasa_device_id: nasa_device_1
+    name: "Water law target flow temperature"
+  - platform: samsung_nasa
+    message: 0x42D4
+    nasa_device_id: nasa_device_1
+    name: "Zone 2 room temperature"
+  - platform: samsung_nasa
+    message: 0x42E8
+    nasa_device_id: nasa_device_1
+    name: "Flow sensor voltage"
+  - platform: samsung_nasa
+    message: 0x4284
+    nasa_device_id: nasa_device_1
+    name: "Indoor unit power consumption"
+  - platform: samsung_nasa
+    message: 0x4423
+    nasa_device_id: nasa_device_1
+    name: "Days since installation"
+  - platform: samsung_nasa
+    message: 0x4424
+    nasa_device_id: nasa_device_1
+    name: "Hours active since installation"
+  - platform: samsung_nasa
+    message: 0x4426
+    nasa_device_id: nasa_device_1
+    name: "Heat pump produced energy (last minute)"
+  - platform: samsung_nasa
+    message: 0x4427
+    nasa_device_id: nasa_device_1
+    name: "Heat pump produced energy (total)"
+  - platform: samsung_nasa
+    message: 0x8000
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit service modes"
+  - platform: samsung_nasa
+    message: 0x8001
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit driving Modes"
+  - platform: samsung_nasa
+    message: 0x8061
+    nasa_device_id: nasa_device_2
+    name: "Defrost operation steps"
+  - platform: samsung_nasa
+    message: 0x8206
+    nasa_device_id: nasa_device_2
+    name: "High pressure"
+  - platform: samsung_nasa
+    message: 0x8208
+    nasa_device_id: nasa_device_2
+    name: "Low pressure"
+  - platform: samsung_nasa
+    message: 0x820A
+    nasa_device_id: nasa_device_2
+    name: "Compresor discharge temperature"
+  - platform: samsung_nasa
+    message: 0x8218
+    nasa_device_id: nasa_device_2
+    name: "Heat exchanger outlet temperature"
+  - platform: samsung_nasa
+    message: 0x821A
+    nasa_device_id: nasa_device_2
+    name: "Compresor suction temperature"
+  - platform: samsung_nasa
+    message: 0x821C
+    nasa_device_id: nasa_device_2
+    name: "Double tube temperature"
+  - platform: samsung_nasa
+    message: 0x821E
+    nasa_device_id: nasa_device_2
+    name: "EVI return temperature"
+  - platform: samsung_nasa
+    message: 0x8220
+    nasa_device_id: nasa_device_2
+    name: "EVI flow temperature"
+  - platform: samsung_nasa
+    message: 0x8236
+    nasa_device_id: nasa_device_2
+    name: "Compressor instruction frequency"
+  - platform: samsung_nasa
+    message: 0x8237
+    nasa_device_id: nasa_device_2
+    name: "Compressor target frequency"
+  - platform: samsung_nasa
+    message: 0x8238
+    nasa_device_id: nasa_device_2
+    name: "Compressor current frequency"
+  - platform: samsung_nasa
+    message: 0x823B
+    nasa_device_id: nasa_device_2
+    name: "Inverter DC voltage input"
+  - platform: samsung_nasa
+    message: 0x823D
+    nasa_device_id: nasa_device_2
+    name: "Outdoor fan speed"
+  - platform: samsung_nasa
+    message: 0x8240
+    nasa_device_id: nasa_device_2
+    name: "Capacity of outdoor unit in kW"
+  - platform: samsung_nasa
+    message: 0x8254
+    nasa_device_id: nasa_device_2
+    name: "IPM1 sensor reading"
+  - platform: samsung_nasa
+    message: 0x827A
+    nasa_device_id: nasa_device_2
+    name: "DSH1 sensor reading"
+  - platform: samsung_nasa
+    message: 0x8280
+    nasa_device_id: nasa_device_2
+    name: "TOP1 sensor reading"
+  - platform: samsung_nasa
+    message: 0x829F
+    nasa_device_id: nasa_device_2
+    name: "High pressure saturation temperature"
+  - platform: samsung_nasa
+    message: 0x82A0
+    nasa_device_id: nasa_device_2
+    name: "Low pressure saturation temperature"
+  - platform: samsung_nasa
+    message: 0x82DF
+    nasa_device_id: nasa_device_2
+    name: "TW1 sensor reading"
+  - platform: samsung_nasa
+    message: 0x82E0
+    nasa_device_id: nasa_device_2
+    name: "TW2 sensor reading"
+  - platform: samsung_nasa
+    message: 0x8411
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit inst. power consumed"
+
 binary_sensor:
   # Added in the fork's code
   # was: threeway_valve_tank
@@ -157,6 +351,60 @@ binary_sensor:
     message: 0x4067
     nasa_device_id: nasa_device_1
     name: "Threeway Valve on Tank"
+
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4028
+    nasa_device_id: nasa_device_1
+    name: "Heating Status"
+  - platform: samsung_nasa
+    message: 0x402E
+    nasa_device_id: nasa_device_1
+    name: "Defrost Status"
+  - platform: samsung_nasa
+    message: 0x406C
+    nasa_device_id: nasa_device_1
+    name: "Backup Heater"
+  - platform: samsung_nasa
+    message: 0x406F
+    nasa_device_id: nasa_device_1
+    name: "Reference Temp"
+  - platform: samsung_nasa
+    message: 0x4087
+    nasa_device_id: nasa_device_1
+    name: "Booster Heater"
+  - platform: samsung_nasa
+    message: 0x4089
+    nasa_device_id: nasa_device_1
+    name: "Primary Water Pump Status"
+  - platform: samsung_nasa
+    message: 0x8010
+    nasa_device_id: nasa_device_2
+    name: "Compressor Running"
+  - platform: samsung_nasa
+    message: 0x8017
+    nasa_device_id: nasa_device_2
+    name: "Hot Gas 1 Status"
+  - platform: samsung_nasa
+    message: 0x8019
+    nasa_device_id: nasa_device_2
+    name: "Liquid Valve Status"
+  - platform: samsung_nasa
+    message: 0x8021
+    nasa_device_id: nasa_device_2
+    name: "EVI Bypass"
+  - platform: samsung_nasa
+    message: 0x801A
+    nasa_device_id: nasa_device_2
+    name: "4-Way Valve Status"
+  - platform: samsung_nasa
+    message: 0x80AF
+    nasa_device_id: nasa_device_2
+    name: "Base Heater Status"
+  - platform: samsung_nasa
+    message: 0x80D7
+    nasa_device_id: nasa_device_2
+    name: "PHE Heater Status"
 
 number:
   # was: water_target_temperature
@@ -171,6 +419,24 @@ number:
     nasa_device_id: nasa_device_1
     name: "Heating Curve Shift"
 
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4201
+    nasa_device_id: nasa_device_1
+    name: "Zone 1 Target Temperature"
+  - platform: samsung_nasa
+    message: 0x42D6
+    nasa_device_id: nasa_device_1
+    name: "Zone 2 Target Temperature"
+  - platform: samsung_nasa
+    message: 0x4247
+    nasa_device_id: nasa_device_1
+    name: "Zone 1 Water Outlet Target Temperature"
+  - platform: samsung_nasa
+    message: 0x42D7
+    nasa_device_id: nasa_device_1
+    name: "Zone 2 Water Outlet Target Temperature"
+
 select:
   # was: water_heater_mode
   # The labels are the ones samsung_ac used (this component calls the first one "Economy").
@@ -179,3 +445,75 @@ select:
     nasa_device_id: nasa_device_1
     name: "Hotwater Mode"
     options: ["Eco", "Standard", "Power", "Force"]
+
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4001
+    nasa_device_id: nasa_device_1
+    name: "Operation mode"
+  - platform: samsung_nasa
+    message: 0x406F
+    nasa_device_id: nasa_device_1
+    name: "Temperature Reference"
+  - platform: samsung_nasa
+    message: 0x8003
+    nasa_device_id: nasa_device_2
+    name: "Cool/heat mode"
+
+switch:
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4000
+    nasa_device_id: nasa_device_1
+    name: "Zone 1 heating On/Off control"
+  - platform: samsung_nasa
+    message: 0x4046
+    nasa_device_id: nasa_device_1
+    name: "Silence mode  On/Off control"
+  - platform: samsung_nasa
+    message: 0x4065
+    nasa_device_id: nasa_device_1
+    name: "DHW On/Off control"
+  - platform: samsung_nasa
+    message: 0x406D
+    nasa_device_id: nasa_device_1
+    name: "Outing On/Off control"
+  - platform: samsung_nasa
+    message: 0x411E
+    nasa_device_id: nasa_device_1
+    name: "Zone 2 heating On/Off control"
+  - platform: samsung_nasa
+    message: 0x4111
+    nasa_device_id: nasa_device_1
+    name: "Turn on/off automatic cleaning"
+
+text_sensor:
+  # --- Added from README tables ---
+  - platform: samsung_nasa
+    message: 0x4002
+    nasa_device_id: nasa_device_1
+    name: "Real-time active mode (text)"
+  - platform: samsung_nasa
+    message: 0x4066
+    nasa_device_id: nasa_device_1
+    name: "DHW mode (text)"
+  - platform: samsung_nasa
+    message: 0x4067
+    nasa_device_id: nasa_device_1
+    name: "Water flow diversion (text)"
+  - platform: samsung_nasa
+    message: 0x8000
+    nasa_device_id: nasa_device_2
+    name: "Indoor unit defrost operation steps (text)"
+  - platform: samsung_nasa
+    message: 0x8001
+    nasa_device_id: nasa_device_2
+    name: "Outdoor unit status (text)"
+  - platform: samsung_nasa
+    message: 0x8061
+    nasa_device_id: nasa_device_2
+    name: "Defrost cycle progress (text)"
+  - platform: samsung_nasa
+    message: 0x8235
+    nasa_device_id: nasa_device_2
+    name: "Error description (text)"
