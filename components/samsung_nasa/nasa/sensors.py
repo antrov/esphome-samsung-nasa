@@ -180,21 +180,6 @@ sensors = {
         NASA_MODE: CONTROLLER_MODE_STATUS,
         CONF_DEFAULTS: temp_sensor_defaults()
     },   
-    0x4239: {
-        NASA_LABEL: "VAR_IN_TEMP_WATER_OUT2_F",
-        NASA_MODE: CONTROLLER_MODE_STATUS,
-        CONF_DEFAULTS: temp_sensor_defaults()
-    },
-    0x428C: {
-        NASA_LABEL: "VAR_IN_TEMP_MIXING_VALVE_F",
-        NASA_MODE: CONTROLLER_MODE_STATUS,
-        CONF_DEFAULTS: temp_sensor_defaults()
-    },
-    0x8223: {
-        NASA_LABEL: "VAR_OUT_CONTROL_TARGET_DISCHARGE",
-        NASA_MODE: CONTROLLER_MODE_STATUS,
-        CONF_DEFAULTS: temp_sensor_defaults()
-    },
     0x427F: {
         NASA_LABEL: "VAR_IN_TEMP_WATER_LAW_F",
         NASA_MODE: CONTROLLER_MODE_STATUS,

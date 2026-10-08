@@ -23,6 +23,14 @@ How:
 
 Entity names determine Home Assistant `unique_id`s (see `MIGRATION.md`). Never rename the 14 migrated entities from the mapping table in `MIGRATION.md`. Rename any other entity only for a good reason (e.g. the name is wrong in meaning), list every rename (old name, new name, reason) in the "Zmiany po migracji" section of `MIGRATION.md`, and keep the old name in the catalogue row as "Wcześniej `…`" (outside the "Encja" cell, which must contain only current names).
 
+## Adding a sensor that is not in the component's registry
+
+`samsung_hvac.yaml` loads the component with `external_components` from GitHub **without `ref`**, i.e. from the default branch (`main`). A change under `components/` reaches the firmware only after it is merged to `main`. A YAML entity whose message is missing from `main`'s registry is built as a "User configured" sensor with no unit, device class or scaling (a temperature of 40.0 shows up as 400).
+
+- Define such a sensor completely in the YAML: `unit_of_measurement`, `device_class`, `state_class`, `accuracy_decimals` and `filters` (see `0x42D8`, `0x4239`). Temperatures need `lambda: return (int16_t)x;` followed by `multiply: 0.1`.
+- Do not also add a registry entry on a feature branch: registry filters and YAML filters are concatenated, so a repeated `multiply: 0.1` would divide by 100 once the branch is merged.
+- Check with `esphome config samsung_hvac.yaml`: the log says "Auto configured" (registry) or "User configured" (YAML) per message, and the printed config shows the filters that will apply.
+
 ## Other conventions
 
 - Owner-facing documentation (`MIGRATION.md`, `catalog/`) is in Polish; code, YAML comments and commit messages are in English.

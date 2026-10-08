@@ -331,18 +331,45 @@ sensor:
     name: "Outdoor unit inst. power consumed"
 
   # --- Added from the 2026-10-08 log (values seen on the bus, not yet exposed) ---
+  # These messages are not in the sensor registry of the component on main (which this file loads
+  # from GitHub), so unit, device class and the x0.1 scaling are defined here, as for 0x42D8.
+  # If a registry entry is added later, drop the filters here: registry and YAML filters add up.
   - platform: samsung_nasa
     message: 0x4239
     nasa_device_id: nasa_device_1
     name: "Water outlet heater temperature"
+    unit_of_measurement: °C
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:thermometer
+    filters:
+      - lambda: return (int16_t)x;
+      - multiply: 0.1
   - platform: samsung_nasa
     message: 0x428C
     nasa_device_id: nasa_device_1
     name: "Mixing valve temperature"
+    unit_of_measurement: °C
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:thermometer
+    filters:
+      - lambda: return (int16_t)x;
+      - multiply: 0.1
   - platform: samsung_nasa
     message: 0x8223
     nasa_device_id: nasa_device_2
     name: "Target discharge temperature"
+    unit_of_measurement: °C
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    icon: mdi:thermometer
+    filters:
+      - lambda: return (int16_t)x;
+      - multiply: 0.1
 
 binary_sensor:
   # Added in the fork's code
