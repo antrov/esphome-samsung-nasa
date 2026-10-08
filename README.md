@@ -23,6 +23,8 @@ All commands, and FSVs are implemented as standard ESPHome components (e.g., num
 
 **NB**: When assigning a nasa device to a samsung_nasa platform component make sure you assign the correct indoor/outdoor unit. The easiest way to check is by looking at the NASA Label information in the tables below. If the label says VAR_IN_... or ENUM_IN_... then the status is reported from the indoor unit. If the label says VAR_OUT_..., LVAR_OUT_... or ENUM_OUT..., then the status is reported from the outdoor unit.
 
+> **Catalogue.** A description of every register, entity and FSV setting used in this fork's `samsung_hvac.yaml` (what it is, units, what it affects) is in [`catalog/`](catalog/README.md) (in Polish). It must be updated with every change - see [`AGENTS.md`](AGENTS.md).
+
 ## Setup on macOS (ESPHome CLI)
 
 Requires [Homebrew](https://brew.sh). ESPHome 2026.5 or newer is needed.
