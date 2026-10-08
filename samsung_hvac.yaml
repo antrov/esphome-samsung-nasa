@@ -343,6 +343,20 @@ sensor:
     nasa_device_id: nasa_device_2
     name: "Outdoor unit inst. power consumed"
 
+  # --- Added from the 2026-10-08 log (values seen on the bus, not yet exposed) ---
+  - platform: samsung_nasa
+    message: 0x4239
+    nasa_device_id: nasa_device_1
+    name: "Water outlet heater temperature"
+  - platform: samsung_nasa
+    message: 0x428C
+    nasa_device_id: nasa_device_1
+    name: "Mixing valve temperature"
+  - platform: samsung_nasa
+    message: 0x8223
+    nasa_device_id: nasa_device_2
+    name: "Target discharge temperature"
+
 binary_sensor:
   # Added in the fork's code
   # was: threeway_valve_tank
@@ -436,6 +450,133 @@ number:
     nasa_device_id: nasa_device_1
     name: "Zone 2 Water Outlet Target Temperature"
 
+  # --- FSV settings seen in the log (user limits, DHW, outing mode) ---
+  - platform: samsung_nasa
+    message: 0x424A
+    nasa_device_id: nasa_device_1
+    name: "FSV 1011 Cooling water out max"
+  - platform: samsung_nasa
+    message: 0x424B
+    nasa_device_id: nasa_device_1
+    name: "FSV 1012 Cooling water out min"
+  - platform: samsung_nasa
+    message: 0x424C
+    nasa_device_id: nasa_device_1
+    name: "FSV 1021 Cooling room max"
+  - platform: samsung_nasa
+    message: 0x424D
+    nasa_device_id: nasa_device_1
+    name: "FSV 1022 Cooling room min"
+  - platform: samsung_nasa
+    message: 0x424E
+    nasa_device_id: nasa_device_1
+    name: "FSV 1031 Heating water out max"
+  - platform: samsung_nasa
+    message: 0x424F
+    nasa_device_id: nasa_device_1
+    name: "FSV 1032 Heating water out min"
+  - platform: samsung_nasa
+    message: 0x4250
+    nasa_device_id: nasa_device_1
+    name: "FSV 1041 Heating room max"
+  - platform: samsung_nasa
+    message: 0x4251
+    nasa_device_id: nasa_device_1
+    name: "FSV 1042 Heating room min"
+  - platform: samsung_nasa
+    message: 0x4252
+    nasa_device_id: nasa_device_1
+    name: "FSV 1051 DHW max temperature"
+  - platform: samsung_nasa
+    message: 0x4253
+    nasa_device_id: nasa_device_1
+    name: "FSV 1052 DHW min temperature"
+  - platform: samsung_nasa
+    message: 0x4260
+    nasa_device_id: nasa_device_1
+    name: "FSV 3021 DHW heat pump max temperature"
+  - platform: samsung_nasa
+    message: 0x4261
+    nasa_device_id: nasa_device_1
+    name: "FSV 3022 DHW heat pump stop"
+  - platform: samsung_nasa
+    message: 0x4262
+    nasa_device_id: nasa_device_1
+    name: "FSV 3023 DHW heat pump start"
+  - platform: samsung_nasa
+    message: 0x4263
+    nasa_device_id: nasa_device_1
+    name: "FSV 3024 DHW min space heating operation time"
+  - platform: samsung_nasa
+    message: 0x4264
+    nasa_device_id: nasa_device_1
+    name: "FSV 3025 DHW max operation time"
+  - platform: samsung_nasa
+    message: 0x4265
+    nasa_device_id: nasa_device_1
+    name: "FSV 3026 DHW max space heating operation time"
+  - platform: samsung_nasa
+    message: 0x4266
+    nasa_device_id: nasa_device_1
+    name: "FSV 3032 DHW booster heater delay time"
+  - platform: samsung_nasa
+    message: 0x4267
+    nasa_device_id: nasa_device_1
+    name: "FSV 3033 DHW booster heater overshoot"
+  - platform: samsung_nasa
+    message: 0x4269
+    nasa_device_id: nasa_device_1
+    name: "FSV 3043 DHW disinfection start time"
+  - platform: samsung_nasa
+    message: 0x426A
+    nasa_device_id: nasa_device_1
+    name: "FSV 3044 DHW disinfection target temperature"
+  - platform: samsung_nasa
+    message: 0x426B
+    nasa_device_id: nasa_device_1
+    name: "FSV 3045 DHW disinfection duration"
+  - platform: samsung_nasa
+    message: 0x426C
+    nasa_device_id: nasa_device_1
+    name: "FSV 3052 DHW forced operation timer"
+  - platform: samsung_nasa
+    message: 0x4273
+    nasa_device_id: nasa_device_1
+    name: "FSV 5011 Outing water out cooling"
+  - platform: samsung_nasa
+    message: 0x4274
+    nasa_device_id: nasa_device_1
+    name: "FSV 5012 Outing room cooling"
+  - platform: samsung_nasa
+    message: 0x4275
+    nasa_device_id: nasa_device_1
+    name: "FSV 5013 Outing water out heating"
+  - platform: samsung_nasa
+    message: 0x4276
+    nasa_device_id: nasa_device_1
+    name: "FSV 5014 Outing room heating"
+  - platform: samsung_nasa
+    message: 0x4277
+    nasa_device_id: nasa_device_1
+    name: "FSV 5015 Outing water law cooling WL1"
+  - platform: samsung_nasa
+    message: 0x4278
+    nasa_device_id: nasa_device_1
+    name: "FSV 5016 Outing water law cooling WL2"
+  - platform: samsung_nasa
+    message: 0x4279
+    nasa_device_id: nasa_device_1
+    name: "FSV 5017 Outing water law heating WL1"
+  - platform: samsung_nasa
+    message: 0x427A
+    nasa_device_id: nasa_device_1
+    name: "FSV 5018 Outing water law heating WL2"
+  - platform: samsung_nasa
+    message: 0x427B
+    nasa_device_id: nasa_device_1
+    name: "FSV 5019 Outing DHW tank temperature"
+
+
 select:
   # was: water_heater_mode
   # The labels are the ones samsung_ac used (this component calls the first one "Economy").
@@ -458,6 +599,37 @@ select:
     message: 0x8003
     nasa_device_id: nasa_device_2
     name: "Cool/heat mode"
+
+  # --- FSV settings seen in the log ---
+  - platform: samsung_nasa
+    message: 0x4095
+    nasa_device_id: nasa_device_1
+    name: "FSV 2091 Remote controller type zone 1"
+  - platform: samsung_nasa
+    message: 0x4096
+    nasa_device_id: nasa_device_1
+    name: "FSV 2092 Remote controller type zone 2"
+  - platform: samsung_nasa
+    message: 0x4127
+    nasa_device_id: nasa_device_1
+    name: "FSV 2093 Remote controller type zone 3"
+  - platform: samsung_nasa
+    message: 0x4097
+    nasa_device_id: nasa_device_1
+    name: "FSV 3011 DHW enable"
+  - platform: samsung_nasa
+    message: 0x409A
+    nasa_device_id: nasa_device_1
+    name: "FSV 3042 DHW disinfection day"
+  - platform: samsung_nasa
+    message: 0x409C
+    nasa_device_id: nasa_device_1
+    name: "FSV 3061 DHW thermostat"
+  - platform: samsung_nasa
+    message: 0x409D
+    nasa_device_id: nasa_device_1
+    name: "FSV 3071 DHW 3-way valve direction"
+
 
 switch:
   # --- Added from README tables ---
@@ -485,6 +657,29 @@ switch:
     message: 0x4111
     nasa_device_id: nasa_device_1
     name: "Turn on/off automatic cleaning"
+
+  # --- FSV settings seen in the log ---
+  - platform: samsung_nasa
+    message: 0x4098
+    nasa_device_id: nasa_device_1
+    name: "FSV 3031 DHW booster heater"
+  - platform: samsung_nasa
+    message: 0x4099
+    nasa_device_id: nasa_device_1
+    name: "FSV 3041 DHW disinfection"
+  - platform: samsung_nasa
+    message: 0x409B
+    nasa_device_id: nasa_device_1
+    name: "FSV 3051 DHW forced operation"
+  - platform: samsung_nasa
+    message: 0x411A
+    nasa_device_id: nasa_device_1
+    name: "FSV 4061 Remote controller option"
+  - platform: samsung_nasa
+    message: 0x4128
+    nasa_device_id: nasa_device_1
+    name: "FSV 5022 Economic DHW mode"
+
 
 text_sensor:
   # --- Added from README tables ---
