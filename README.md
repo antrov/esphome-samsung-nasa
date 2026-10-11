@@ -23,6 +23,8 @@ All commands, and FSVs are implemented as standard ESPHome components (e.g., num
 
 **NB**: When assigning a nasa device to a samsung_nasa platform component make sure you assign the correct indoor/outdoor unit. The easiest way to check is by looking at the NASA Label information in the tables below. If the label says VAR_IN_... or ENUM_IN_... then the status is reported from the indoor unit. If the label says VAR_OUT_..., LVAR_OUT_... or ENUM_OUT..., then the status is reported from the outdoor unit.
 
+> **Catalogue.** A description of every register, entity and FSV setting used in this fork's `samsung_hvac.yaml` (what it is, units, what it affects) is in [`catalog/`](catalog/README.md) (in Polish). It must be updated with every change - see [`AGENTS.md`](AGENTS.md).
+
 ## Setup on macOS (ESPHome CLI)
 
 Requires [Homebrew](https://brew.sh). ESPHome 2026.5 or newer is needed.
@@ -877,6 +879,16 @@ time:
 ```
 
 Thanks to [@mergwyn](https://github.com/mergwyn) for providing these examples.
+
+### Hourly and daily COP from the energy counters (this fork)
+
+The daily example above adds up the *power* readings, so the energy used while the ESP is offline (a reboot, an OTA update) or while it misses a message is lost, and it resets at midnight, which leaves the sensor unknown for hours until the heat pump has run. This fork's [samsung_hvac.yaml](samsung_hvac.yaml) publishes `COP - Hourly` and `COP - Daily` another way: as the COP over the last 60 minutes and the last 24 hours (rolling windows), from the lifetime energy counters 0x4427 (heat produced) and 0x8414 (electricity consumed): `(heat now - heat at the start of the window) / (electricity now - electricity at the start of the window)`. The heat pump keeps counting while the ESP is offline, so a reboot loses nothing.
+
+* A COP only exists while the heat pump runs. The value is recalculated only while the heat pump delivers heat and the window holds at least 0.1 kWh (hour) / 0.5 kWh (day) of electricity (the `cop_min_kwh_hourly` / `cop_min_kwh_daily` substitutions); otherwise the last value is kept, also over a reboot (it is stored in flash). The sensors therefore never turn "unknown" or reset. Until the first calculation after the first start they show the COP of the whole life of the heat pump.
+* The readings are time-stamped with UTC time from the `homeassistant` time source, so the time zone does not matter.
+* The value is limited to 0 - 8, as in the examples above, and it is the COP of the outdoor unit only: 0x8414 does not include the circulation pump or the heaters of the hydraulic module.
+
+To reuse it, copy the `substitutions`, `time`, `globals` and `interval` blocks and the two `COP` template sensors from `samsung_hvac.yaml`, and give the 0x4427 and 0x8414 sensors the ids `heat_pump_produced_energy` and `heat_pump_cumulative_energy`. More details (in Polish) are in [catalog/energy-diagnostics.md](catalog/energy-diagnostics.md).
 
 ## Home Assistant
 
