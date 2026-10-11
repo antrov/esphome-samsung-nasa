@@ -6,15 +6,6 @@
 # the device name, the entity names and the platform of each entity are kept exactly as before.
 # Do not rename anything here without reading MIGRATION.md.
 
-substitutions:
-  # Hourly / daily COP (see the end of this file): the COP is recalculated only when the outdoor unit
-  # has drawn at least this much electricity (kWh) in the window (the last 60 minutes / 24 hours).
-  # An idle unit draws little (the lowest 0x8413 reading in the 2026-10-08 log was 15 W: ~0.015 kWh
-  # per hour, ~0.4 kWh per day), so standby consumption or the first minute of a run alone never
-  # produce a COP.
-  cop_min_kwh_hourly: "0.1"
-  cop_min_kwh_daily: "0.5"
-
 esphome:
   name: samsung_hvac
   friendly_name: Samsung HVAC
@@ -53,12 +44,6 @@ wifi:
   ap: {}
 
 captive_portal:
-
-# Clock for the hourly / daily COP (end of this file): it time-stamps the energy readings, so that
-# the 24-hour window also survives a reboot. The time zone does not matter (UTC time stamps).
-time:
-  - platform: homeassistant
-    id: homeassistant_time
 
 # M5Atom Lite + ATOM Tail485 (board m5stack-atom). The Tail485 converter switches the RS485
 # direction by itself, so no flow_control_pin is needed. Pins: TX = G26, RX = G32.
@@ -100,7 +85,6 @@ sensor:
     message: 0x8414
     nasa_device_id: nasa_device_2
     name: "Outdoor Cumulative Energy"
-    id: heat_pump_cumulative_energy  # kWh counter used by the hourly / daily COP
   # was: outdoor_current
   - platform: samsung_nasa
     message: 0x8217
@@ -258,7 +242,6 @@ sensor:
     message: 0x4427
     nasa_device_id: nasa_device_1
     name: "Heat pump produced energy (total)"
-    id: heat_pump_produced_energy  # kWh counter used by the hourly / daily COP
   - platform: samsung_nasa
     message: 0x8000
     nasa_device_id: nasa_device_2
@@ -387,31 +370,6 @@ sensor:
     filters:
       - lambda: return (int16_t)x;
       - multiply: 0.1
-
-  # --- Calculated: COP over the last 60 minutes / 24 hours ---
-  # Heat produced (0x4427) divided by electricity consumed by the outdoor unit (0x8414) in the
-  # window. The `interval` block at the end of this file calculates the values; these sensors only
-  # show them, and keep showing the last one while the heat pump is not running.
-  - platform: template
-    id: cop_hourly
-    name: "COP - Hourly"
-    icon: mdi:chart-bar
-    state_class: measurement
-    accuracy_decimals: 2
-    update_interval: 10s
-    lambda: return id(cop_hourly_last);
-    filters:
-      - delta: 0.01
-  - platform: template
-    id: cop_daily
-    name: "COP - Daily"
-    icon: mdi:chart-bar
-    state_class: measurement
-    accuracy_decimals: 2
-    update_interval: 10s
-    lambda: return id(cop_daily_last);
-    filters:
-      - delta: 0.01
 
 binary_sensor:
   # Added in the fork's code
@@ -767,94 +725,3 @@ text_sensor:
     message: 0x8235
     nasa_device_id: nasa_device_2
     name: "Error description (text)"
-
-
-# --- COP over the last 60 minutes and the last 24 hours ("COP - Hourly" / "COP - Daily") ---
-# COP = heat produced / electricity consumed in the window, from the lifetime counters 0x4427 and
-# 0x8414: the difference between the latest reading and the oldest reading in the window. The unit
-# keeps counting while the ESP is offline or misses a message, so a reboot or an OTA update does not
-# lose any energy (integrating the power readings, as the README examples do, would).
-# A COP only exists while the heat pump runs. So a value is recalculated only while the heat pump
-# delivers heat (>= 20 Wh in the last ~10 minutes) and the window holds at least cop_min_kwh_* of
-# electricity; otherwise the last value is kept, in flash, so also over a reboot. The sensors never
-# turn "unknown" and never reset - except that until the first calculation after the first start
-# they show the COP of the whole life of the heat pump (0x4427 / 0x8414).
-globals:
-  # Readings of the two counters: [UTC time in seconds, 0x4427 in Wh, 0x8414 in Wh]. One reading per
-  # minute for the last hour (RAM only) and one per hour for the last 24 hours (flash, so that the
-  # 24-hour window survives a reboot).
-  - id: cop_minutes
-    type: "uint32_t[64][3]"
-  - id: cop_hours
-    type: "uint32_t[27][3]"
-    restore_value: true
-  # The COP calculated last (kept in flash: the sensors show it right after a reboot)
-  - id: cop_hourly_last
-    type: float
-    restore_value: true
-    initial_value: "NAN"
-  - id: cop_daily_last
-    type: float
-    restore_value: true
-    initial_value: "NAN"
-
-interval:
-  - interval: 60s
-    then:
-      - lambda: |-
-          auto now = id(homeassistant_time).now();
-          if (!now.is_valid()) return;  // the clock is not synchronised with Home Assistant yet
-          const float heat_kwh = id(heat_pump_produced_energy).state;    // 0x4427, lifetime
-          const float elec_kwh = id(heat_pump_cumulative_energy).state;  // 0x8414, lifetime
-          // No data from the heat pump yet (NaN) or a nonsense value
-          if (!(heat_kwh >= 0.0f && heat_kwh < 4.0e6f && elec_kwh >= 0.0f && elec_kwh < 4.0e6f)) return;
-          const uint32_t t = (uint32_t) now.timestamp;                   // UTC seconds
-          const uint32_t heat = (uint32_t) (heat_kwh * 1000.0f + 0.5f);  // Wh
-          const uint32_t elec = (uint32_t) (elec_kwh * 1000.0f + 0.5f);  // Wh
-
-          // Keep the first reading of every `bucket` seconds in a ring of readings.
-          auto store = [&](auto &ring, uint32_t bucket) {
-            const size_t n = sizeof(ring) / sizeof(ring[0]);
-            for (size_t i = 0; i < n; i++) {
-              // A counter that went backwards (reset, another unit) makes the older readings useless.
-              if (ring[i][1] > heat || ring[i][2] > elec) ring[i][0] = 0;
-            }
-            auto &slot = ring[(t / bucket) % n];
-            if (slot[0] == 0 || slot[0] / bucket != t / bucket) {
-              slot[0] = t;
-              slot[1] = heat;
-              slot[2] = elec;
-            }
-          };
-          // The oldest reading that is at most `max_age` seconds old (-1 when there is none).
-          auto oldest = [&](auto &ring, uint32_t max_age) -> int {
-            const size_t n = sizeof(ring) / sizeof(ring[0]);
-            int found = -1;
-            for (size_t i = 0; i < n; i++) {
-              if (ring[i][0] == 0 || ring[i][0] >= t || t - ring[i][0] > max_age) continue;
-              if (found < 0 || ring[i][0] < ring[found][0]) found = (int) i;
-            }
-            return found;
-          };
-          store(id(cop_minutes), 60);
-          store(id(cop_hours), 3600);
-
-          // Does the heat pump deliver heat now? (at least 20 Wh within the last ~10 minutes)
-          const int recent = oldest(id(cop_minutes), 630);
-          const bool heating = recent >= 0 && heat - id(cop_minutes)[recent][1] >= 20;
-
-          // Recalculate one COP over the window that starts at the oldest reading of its ring.
-          auto refresh = [&](auto &ring, uint32_t max_age, float min_kwh, float &cop) {
-            if (std::isnan(cop) && elec > 0) {  // first start: begin with the COP of the whole life
-              cop = (float) heat / (float) elec;
-              if (cop > 8.0f) cop = 8.0f;
-            }
-            const int start = oldest(ring, max_age);
-            if (!heating || start < 0) return;
-            const float used = (elec - ring[start][2]) / 1000.0f;  // kWh
-            if (used < min_kwh) return;
-            cop = (heat - ring[start][1]) / 1000.0f / used;
-            if (cop > 8.0f) cop = 8.0f;  // the same limit as in the README examples
-          };
-          refresh(id(cop_minutes), 3630, ${cop_min_kwh_hourly}, id(cop_hourly_last));  // last 60 minutes
-          refresh(id(cop_hours), 90000, ${cop_min_kwh_daily}, id(cop_daily_last));     // last 24-25 hours
