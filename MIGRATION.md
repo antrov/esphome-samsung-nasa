@@ -66,7 +66,7 @@ Dotyczą wyłącznie encji dodanych **po** migracji (z tabel README i z logu mag
 
 **Usunięte encje.** Jednostka wysyła dla nich stałą „brak czujnika", więc w HA wychodziły wartości absurdalne: `High pressure` (`0x8206`) i `Low pressure` (`0x8208`) – 65535, czyli ok. 642 679 kPa; `TW1 sensor reading` (`0x82DF`) i `TW2 sensor reading` (`0x82E0`) – 65036, czyli −50 °C. Po wgraniu usuń je w HA (będą niedostępne). Opisy i powód: [`catalog/unused.md`](catalog/unused.md).
 
-**Usunięte encje (11.10.2026).** `COP - Hourly` i `COP - Daily` (sensory szablonowe z krótkiego okresu 08–11.10.2026) zostały usunięte razem z blokami `time`, `globals`, `interval` i `substitutions`; COP właściciel liczy w Home Assistant z liczników `0x4427` ÷ `0x8414`. Po wgraniu usuń je w HA (będą niedostępne).
+**Usunięte encje (11.10.2026).** `COP - Hourly` i `COP - Daily` (sensory szablonowe z krótkiego okresu 08–11.10.2026) zostały usunięte razem z blokami `time`, `globals`, `interval` i `substitutions`; COP liczy się teraz w Home Assistant z liczników `0x4427` ÷ `0x8414` (gotowy pakiet: [`homeassistant/heat_pump_cop.yaml`](homeassistant/heat_pump_cop.yaml)). Po wgraniu usuń stare encje w HA (będą niedostępne); pakiet tworzy nowe `COP - Hourly` i `COP - Daily` z własnymi `unique_id`.
 
 ## Co sprawdziłem
 

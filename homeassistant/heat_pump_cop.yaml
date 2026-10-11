@@ -1,0 +1,99 @@
+# Home Assistant package: hourly and daily COP of the Samsung EHS heat pump.
+#
+# This runs in Home Assistant, not in ESPHome (the ESPHome versions were removed on 2026-10-11).
+# The inputs are the two lifetime energy counters published by samsung_hvac.yaml:
+#   0x4427  "Heat pump produced energy (total)"  - heat delivered by the pump [kWh]
+#   0x8414  "Outdoor Cumulative Energy"           - electricity used by the outdoor unit [kWh]
+# COP over a window = heat delivered in the window / electricity used in the window.
+# The pump keeps counting while the ESP is offline, so a reboot or an OTA update loses nothing.
+#
+# Install:
+#   1. Copy this file to <HA config>/packages/heat_pump_cop.yaml and enable packages in
+#      configuration.yaml (skip if you already use them):
+#        homeassistant:
+#          packages: !include_dir_named packages
+#   2. Check the entity_id of both counters in Developer tools -> States and, if they differ,
+#      replace the two ids below (each appears twice):
+#        sensor.samsung_hvac_heat_pump_produced_energy_total
+#        sensor.samsung_hvac_outdoor_cumulative_energy
+#   3. Check the configuration and restart Home Assistant.
+#
+# The statistics sensors rebuild their window from the recorder after a restart. The two COP
+# sensors keep their last value while the pump is idle (the window holds too little energy),
+# so they do not turn "unknown" between runs.
+#
+# The result is the COP of the outdoor unit only: 0x8414 does not include the circulation pump or
+# the heaters of the hydraulic module, so the real COP of the whole system is lower.
+
+sensor:
+  # --- rolling window: last 60 minutes ---
+  - platform: statistics
+    name: "Heat pump heat produced 1h"
+    unique_id: heat_pump_heat_produced_1h
+    entity_id: sensor.samsung_hvac_heat_pump_produced_energy_total
+    state_characteristic: change
+    max_age:
+      hours: 1
+    sampling_size: 500
+    precision: 3
+  - platform: statistics
+    name: "Heat pump electricity used 1h"
+    unique_id: heat_pump_electricity_used_1h
+    entity_id: sensor.samsung_hvac_outdoor_cumulative_energy
+    state_characteristic: change
+    max_age:
+      hours: 1
+    sampling_size: 500
+    precision: 3
+
+  # --- rolling window: last 24 hours ---
+  - platform: statistics
+    name: "Heat pump heat produced 24h"
+    unique_id: heat_pump_heat_produced_24h
+    entity_id: sensor.samsung_hvac_heat_pump_produced_energy_total
+    state_characteristic: change
+    max_age:
+      hours: 24
+    sampling_size: 5000
+    precision: 3
+  - platform: statistics
+    name: "Heat pump electricity used 24h"
+    unique_id: heat_pump_electricity_used_24h
+    entity_id: sensor.samsung_hvac_outdoor_cumulative_energy
+    state_characteristic: change
+    max_age:
+      hours: 24
+    sampling_size: 5000
+    precision: 3
+
+template:
+  - sensor:
+      - name: "COP - Hourly"
+        unique_id: heat_pump_cop_hourly
+        icon: mdi:heat-pump
+        state_class: measurement
+        # A COP exists only while the pump runs: below min_kwh of electricity in the window the
+        # previous value is kept. The result is limited to 0 - 8.
+        state: >
+          {% set min_kwh = 0.1 %}
+          {% set heat = states('sensor.heat_pump_heat_produced_1h') | float(none) %}
+          {% set electricity = states('sensor.heat_pump_electricity_used_1h') | float(none) %}
+          {% if heat is not none and electricity is not none and electricity >= min_kwh and heat >= 0 %}
+            {{ [heat / electricity, 8] | min | round(2) }}
+          {% else %}
+            {{ this.state }}
+          {% endif %}
+
+      - name: "COP - Daily"
+        unique_id: heat_pump_cop_daily
+        icon: mdi:heat-pump
+        state_class: measurement
+        state: >
+          {% set min_kwh = 0.5 %}
+          {% set heat = states('sensor.heat_pump_heat_produced_24h') | float(none) %}
+          {% set electricity = states('sensor.heat_pump_electricity_used_24h') | float(none) %}
+          {% if heat is not none and electricity is not none and electricity >= min_kwh and heat >= 0 %}
+            {{ [heat / electricity, 8] | min | round(2) }}
+          {% else %}
+            {{ this.state }}
+          {% endif %}

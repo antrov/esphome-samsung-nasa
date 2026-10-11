@@ -880,15 +880,18 @@ time:
 
 Thanks to [@mergwyn](https://github.com/mergwyn) for providing these examples.
 
-### Hourly and daily COP from the energy counters (this fork)
+### Hourly and daily COP in Home Assistant (this fork)
 
-The daily example above adds up the *power* readings, so the energy used while the ESP is offline (a reboot, an OTA update) or while it misses a message is lost, and it resets at midnight, which leaves the sensor unknown for hours until the heat pump has run. This fork's [samsung_hvac.yaml](samsung_hvac.yaml) publishes `COP - Hourly` and `COP - Daily` another way: as the COP over the last 60 minutes and the last 24 hours (rolling windows), from the lifetime energy counters 0x4427 (heat produced) and 0x8414 (electricity consumed): `(heat now - heat at the start of the window) / (electricity now - electricity at the start of the window)`. The heat pump keeps counting while the ESP is offline, so a reboot loses nothing.
+The ESPHome examples above have two weaknesses: the daily one adds up *power* readings, so energy used while the ESP is offline (a reboot, an OTA update) or while it misses a message is lost, and it resets at midnight, which leaves the sensor unknown for hours. This fork therefore computes the hourly and daily COP in Home Assistant, from the lifetime energy counters that the heat pump keeps counting itself: 0x4427 (heat produced) and 0x8414 (electricity consumed by the outdoor unit). The ready-to-use package is [homeassistant/heat_pump_cop.yaml](homeassistant/heat_pump_cop.yaml).
 
-* A COP only exists while the heat pump runs. The value is recalculated only while the heat pump delivers heat and the window holds at least 0.1 kWh (hour) / 0.5 kWh (day) of electricity (the `cop_min_kwh_hourly` / `cop_min_kwh_daily` substitutions); otherwise the last value is kept, also over a reboot (it is stored in flash). The sensors therefore never turn "unknown" or reset. Until the first calculation after the first start they show the COP of the whole life of the heat pump.
-* The readings are time-stamped with UTC time from the `homeassistant` time source, so the time zone does not matter.
+It creates `COP - Hourly` and `COP - Daily`: the COP over the last 60 minutes and the last 24 hours (rolling windows), `heat produced in the window / electricity used in the window`. Each window is the `change` of a counter, measured by a `statistics` sensor, and the two `COP` template sensors divide them.
+
+* A COP only exists while the heat pump runs. The value is recalculated only while the window holds at least 0.1 kWh (hour) / 0.5 kWh (day) of electricity; otherwise the last value is kept, so the sensors do not turn "unknown" between runs.
 * The value is limited to 0 - 8, as in the examples above, and it is the COP of the outdoor unit only: 0x8414 does not include the circulation pump or the heaters of the hydraulic module.
+* The two counters are refreshed at different moments, so the hourly value is noisy around start-up and defrost; the daily one is steadier.
+* For a calendar day or hour instead of a rolling window, use `utility_meter` helpers (cycle `daily` / `hourly`) on the same two counters and divide them in a template sensor. Right after midnight (or the full hour) the denominator is close to zero, so the COP is unreliable then.
 
-To reuse it, copy the `substitutions`, `time`, `globals` and `interval` blocks and the two `COP` template sensors from `samsung_hvac.yaml`, and give the 0x4427 and 0x8414 sensors the ids `heat_pump_produced_energy` and `heat_pump_cumulative_energy`. More details (in Polish) are in [catalog/energy-diagnostics.md](catalog/energy-diagnostics.md).
+The installation steps are in the header of the file. More details (in Polish) are in [catalog/energy-diagnostics.md](catalog/energy-diagnostics.md).
 
 ## Home Assistant
 
