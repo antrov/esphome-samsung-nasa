@@ -372,13 +372,6 @@ sensor:
       - multiply: 0.1
 
 binary_sensor:
-  # Added in the fork's code
-  # was: threeway_valve_tank
-  - platform: samsung_nasa
-    message: 0x4067
-    nasa_device_id: nasa_device_1
-    name: "Threeway Valve on Tank"
-
   # --- Added from README tables ---
   - platform: samsung_nasa
     message: 0x4028
@@ -590,7 +583,6 @@ number:
     nasa_device_id: nasa_device_1
     name: "FSV 5019 Outing DHW tank temperature"
 
-
 select:
   # was: water_heater_mode
   # The labels are the ones samsung_ac used (this component calls the first one "Economy").
@@ -644,7 +636,6 @@ select:
     nasa_device_id: nasa_device_1
     name: "FSV 3071 DHW 3-way valve direction"
 
-
 switch:
   # --- Added from README tables ---
   - platform: samsung_nasa
@@ -693,7 +684,6 @@ switch:
     message: 0x4128
     nasa_device_id: nasa_device_1
     name: "FSV 5022 DHW saving mode"
-
 
 text_sensor:
   # --- Added from README tables ---
