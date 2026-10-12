@@ -68,6 +68,13 @@ samsung_nasa:
     - address: 10.00.00
       id: nasa_device_2
 
+# --- Extra temperature probes wired directly to the M5Atom (not NASA) ---
+# DS18B20 on the ATOM Lite bottom connector, DATA = GPIO22 with a 4.7 kOhm pull-up to 3V3.
+# Several probes can share the bus; each one needs its own `address` (see the log on first boot).
+one_wire:
+  - platform: gpio
+    pin: GPIO22
+
 sensor:
   # --- Outdoor unit (10.00.00) ---
   # was: error_code
@@ -370,6 +377,16 @@ sensor:
     filters:
       - lambda: return (int16_t)x;
       - multiply: 0.1
+
+  # --- Extra DS18B20 probe on GPIO22 (not a NASA message) ---
+  # With a single probe on the bus `address` may be omitted; with more probes set it explicitly.
+  - platform: dallas_temp
+    name: "Extra temperature 1"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    accuracy_decimals: 1
+    update_interval: 30s
 
 binary_sensor:
   # Added in the fork's code
