@@ -13,7 +13,7 @@ Ten katalog opisuje **wszystko, co jest wystawione z pompy ciepła w `samsung_hv
 | [`dhw.md`](dhw.md) | Ciepła woda użytkowa (CWU): włączenie, tryb, temperatura zadana i w zasobniku, zawór 3-drożny, grzałka booster |
 | [`hydraulics.md`](hydraulics.md) | Temperatury wody (wlot, wylot, grzałka, zawór mieszający), przepływ, temperatury czynnika na wymienniku płytowym |
 | [`outdoor-unit.md`](outdoor-unit.md) | Jednostka zewnętrzna: stan pracy, sprężarka, zawory, defrost, czujniki obiegu chłodniczego, falownik, wentylator |
-| [`energy-diagnostics.md`](energy-diagnostics.md) | Moc i energia (pobór, produkcja ciepła), napięcie i prąd, liczniki życia urządzenia, kody błędów |
+| [`energy-diagnostics.md`](energy-diagnostics.md) | Moc i energia (pobór, produkcja ciepła), napięcie i prąd, liczniki życia urządzenia, kody błędów, zapis awarii 07–09.11.2026 |
 | [`fsv.md`](fsv.md) | Ustawienia serwisowe FSV wystawione w YAML (limity 10xx, termostaty 20xx, CWU 30xx, strefy 40xx, wyjazd 50xx) |
 | [`unused.md`](unused.md) | Czego **nie** ma w YAML: komunikaty widziane na magistrali, gotowe w komponencie FSV-y (kandydaci), ustawienia bez znanego komunikatu |
 
@@ -25,7 +25,7 @@ Każdy wiersz = **jeden komunikat NASA** (jedno ID). Jeśli ten sam komunikat je
 |---|---|
 | **ID** | Numer komunikatu NASA (`0x4235`) i urządzenie: **IN** = jednostka wewnętrzna / Control Kit `20.00.00` (`nasa_device_1`), **OUT** = jednostka zewnętrzna `10.00.00` (`nasa_device_2`) |
 | **Encja** | Dokładna nazwa w YAML/HA w apostrofach (od niej zależy `unique_id` w HA – nie zmieniaj, patrz [`MIGRATION.md`](../MIGRATION.md)) i platforma. *number*, *select*, *switch* = odczyt i zapis; *sensor*, *binary_sensor*, *text_sensor* = tylko odczyt |
-| **Wartości** | Jednostka, skala po stronie komponentu, zakres/opcje; pod spodem `log:` = przykładowa wartość z zapisu 08.10.2026 |
+| **Wartości** | Jednostka, skala po stronie komponentu, zakres/opcje; pod spodem `log:` = przykładowa wartość z zapisu 08.10.2026, a `log 07–09.11.2026:` = zakres z historii Home Assistant z okresu awarii |
 | **Co to jest** | Znaczenie komunikatu |
 | **Na co wpływa, uwagi** | Skutki zmiany lub interpretacji, powiązane FSV i komunikaty, pułapki |
 | **Źr.** | Skąd pochodzi opis (poniżej) |
@@ -37,12 +37,14 @@ Każdy wiersz = **jeden komunikat NASA** (jedno ID). Jeśli ten sam komunikat je
 | **M** | Instrukcja Samsunga do sterownika przewodowego / Control Kit – [`MIM-E03EN.pdf`](../MIM-E03EN.pdf), str. 6–46 | wysoka (producent) |
 | **P** | Lista kodów NASA – [`samsung_nasa_protocol.md`](../samsung_nasa_protocol.md) / [`NASA.pdf`](../NASA.pdf) (nieoficjalna, od społeczności) | średnia; część nazw to tylko `??` |
 | **K** | Kod komponentu: rejestry w [`components/samsung_nasa/nasa/*.py`](../components/samsung_nasa/nasa) (skalowanie, zakresy, mapowania tekstów) | pewna co do tego, *co robi komponent* |
-| **L** | Obserwacja w logu ESPHome z 08.10.2026 (21:48–21:53, instalacja właściciela) | fakt, ale pojedyncza próbka z 5 minut |
+| **L** | Obserwacja w logu ESPHome z 08.10.2026 (21:48–21:53, instalacja właściciela) albo w historii Home Assistant z 07–09.11.2026 (eksport CSV, 51 h, okres awarii) – zawsze z datą przy wartości | fakt, ale z jednej instalacji; próbka z 08.10 trwa 5 minut, a zapis z 07–09.11 obejmuje pracę z usterką |
 | **W** | Wnioskowanie / hipoteza – spójne z danymi, lecz niepotwierdzone dokumentacją | niska; do weryfikacji |
 
 ### O wartościach „log"
 
-Wartości oznaczone `log:` pochodzą z jednego, pięciominutowego zapisu z 08.10.2026 (pompa grzała strefę 1, w trakcie zmieniano ustawienia stref, na końcu zasobnik CWU). To **przykłady i migawka konfiguracji**, nie wartości stałe. Brak próbki (`brak próbek`) znaczy tylko, że komunikat nie pojawił się w tym oknie (np. wysyłany rzadko lub nieobsługiwany przez ten model). Aby odświeżyć przykłady, zbierz nowy zapis (`esphome logs samsung_hvac.yaml`), podsumuj go skryptem [`tools/collect_logs.py`](../tools/collect_logs.py) (opcja `--from-file`) i zaktualizuj w katalogu wartości oraz datę.
+Wartości oznaczone `log:` pochodzą z jednego, pięciominutowego zapisu z 08.10.2026 (pompa grzała strefę 1, w trakcie zmieniano ustawienia stref, na końcu zasobnik CWU). To **przykłady i migawka konfiguracji**, nie wartości stałe. Brak próbki (`brak próbek`) znaczy tylko, że komunikat nie pojawił się w tym oknie (np. wysyłany rzadko lub nieobsługiwany przez ten model). Wartości oznaczone `log 07–09.11.2026:` pochodzą z eksportu historii Home Assistant (141 encji, od 07.11 08:00 do 09.11 11:00 czasu polskiego). W tym czasie pompa najpierw pracowała poprawnie, a potem z usterką obiegu chłodniczego (błędy 464, 462, 416), więc skrajne wartości z tego zapisu **nie są wartościami normalnej pracy** – przebieg i interpretacja: [`energy-diagnostics.md`](energy-diagnostics.md), sekcja „Zapis awarii". Historia HA zapisuje zmiany stanu, nie każdy komunikat z magistrali.
+
+Aby odświeżyć przykłady, zbierz nowy zapis (`esphome logs samsung_hvac.yaml`), podsumuj go skryptem [`tools/collect_logs.py`](../tools/collect_logs.py) (opcja `--from-file`) i zaktualizuj w katalogu wartości oraz datę.
 
 ### Domyślne wartości FSV
 
@@ -59,6 +61,8 @@ Obserwacje, które warto znać, zanim zaufasz konkretnej encji (szczegóły przy
 5. **`0x823B` i `0x42E8`.** Wartości po przeskalowaniu (150–170 „V" DC link, 17–20 „V" czujnika przepływu) wyglądają na niezgodne ze skalą/etykietą – traktuj jako wskaźniki względne.
 6. **`0x8240` – kW czy %?** Lista kodów mówi „wartość w procentach", komponent przelicza ×0,1 jako kW; brak próbek w logu.
 7. **`0x8061` – różne mapowania.** Lista kodów podaje inne wartości (255 = brak defrostu) niż komponent (0 = brak); w logu było 0, więc mapowanie komponentu zgadza się z obserwacją.
+8. **`0x8413` zawiera grzałkę booster.** Gdy grzałka pracuje, `Outdoor Instantaneous Power` jest o ok. 3,1 kW wyższe niż `0x8411` (log 08.11.2026). Do COP sprężarki używaj `0x8411` lub licznika `0x8414`.
+9. **`0x4206` nasyca się na 70,0 °C.** Wyższych temperatur czynnika na wymienniku płytowym nie zobaczysz (log 07–09.11.2026).
 
 ## Źródła i ograniczenia
 

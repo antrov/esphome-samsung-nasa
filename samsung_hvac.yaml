@@ -371,6 +371,19 @@ sensor:
       - lambda: return (int16_t)x;
       - multiply: 0.1
 
+  # --- Added 2026-11-10 for refrigerant circuit diagnostics (see catalog/energy-diagnostics.md) ---
+  # Position of the main expansion valve in steps (0 to 480 seen in the 2026-10-08 log). Together
+  # with the discharge temperature it tells a valve fault from a compressor that does not pump.
+  # Not in the sensor registry on main, so unit and state class are defined here; no scaling.
+  - platform: samsung_nasa
+    message: 0x8229
+    nasa_device_id: nasa_device_2
+    name: "EEV1 position"
+    unit_of_measurement: steps
+    state_class: measurement
+    accuracy_decimals: 0
+    icon: mdi:valve
+
 binary_sensor:
   # --- Added from README tables ---
   - platform: samsung_nasa

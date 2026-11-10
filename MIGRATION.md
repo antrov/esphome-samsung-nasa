@@ -68,6 +68,10 @@ Dotyczą wyłącznie encji dodanych **po** migracji (z tabel README i z logu mag
 
 **Usunięte encje (11.10.2026).** `COP - Hourly` i `COP - Daily` (sensory szablonowe z krótkiego okresu 08–11.10.2026) zostały usunięte razem z blokami `time`, `globals`, `interval` i `substitutions`; COP właściciel liczy w Home Assistant z liczników `0x4427` ÷ `0x8414`. Po wgraniu usuń je w HA (będą niedostępne).
 
+**Usunięta encja (12.10.2026).** `Threeway Valve on Tank` (binary_sensor, `0x4067`) – jedna z 14 encji z tabeli „Mapowanie encji" – została usunięta z YAML przez właściciela jako duplikat: ten sam komunikat wystawiają `DHW valve` (sensor) i `Water flow diversion (text)` (text_sensor). Po wgraniu firmware bez tej encji usuń ją w HA (będzie niedostępna), a automatyzacje przepnij na `DHW valve`.
+
+**Dodana encja (10.11.2026).** `EEV1 position` (sensor, `0x8229`, kroki) – położenie głównego zaworu rozprężnego, do diagnostyki obiegu chłodniczego po awarii z 07–09.11.2026 (opis: [`catalog/outdoor-unit.md`](catalog/outdoor-unit.md), zapis awarii: [`catalog/energy-diagnostics.md`](catalog/energy-diagnostics.md)). Nowa encja, nie zmienia żadnej istniejącej.
+
 ## Co sprawdziłem
 
 - `esphome config` na ESPHome 2026.6.5: konfiguracja jest poprawna.

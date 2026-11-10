@@ -14,7 +14,6 @@ Kolumna „Nazwa NASA" to nazwa z listy kodów ([`samsung_nasa_protocol.md`](../
 | `0x420C`<br>IN | `NASA_INDOOR_OUTER_TEMP` | 15,4–15,6 °C (÷10) | Kopia temperatury zewnętrznej (`0x8204`) po stronie jednostki wewnętrznej. Zbędna, gdy jest `0x8204`. |
 | `0x4229`<br>IN | `VAR_IN_MODEL_INFORMATION` | 115 | Kod modelu/informacji o jednostce wewnętrznej; wartości nie da się zinterpretować bez tablicy producenta. |
 | `0x42CE`<br>IN | `VAR_IN_FSV_3046` | 480 | FSV 3046 (maks. czas dezynfekcji). Jednostka zgłasza **minuty** (480 = 8 h = wartość domyślna), a definicja w `numbers.py` zakłada godziny 1–24 – przed wystawieniem trzeba poprawić skalowanie (÷60 / ×60). |
-| `0x8229`<br>OUT | `VAR_OUT_LOAD_OUTEEV1` | 480 → 376 → 0 → 159 → 176 → 189 → 206 | Położenie głównego zaworu rozprężnego EEV1 (kroki); po starcie sprężarki otwierał się stopniowo. Przydatne do diagnostyki obiegu. |
 | `0x82DB`<br>OUT | `VAR_OUT_PHASE_CURRENT` | 0, 5–9 | Prąd fazowy falownika (jednostka niepotwierdzona). |
 | `0x8248`<br>OUT | `NASA_OUTDOOR_SAFETY_START` | 6 → 3 → 0 → 1 → 2 | Numer kroku sekwencji bezpiecznego rozruchu (zbiega się z `0x8001` = 1 Safety). |
 | `0x8247`<br>OUT | `NASA_OUTDOOR_DEFROST_STEP` | 0 | Krok odszraniania po stronie jednostki zewnętrznej (porównaj `0x8061`). |
