@@ -37,7 +37,7 @@ Każdy wiersz = **jeden komunikat NASA** (jedno ID). Jeśli ten sam komunikat je
 | **M** | Instrukcja Samsunga do sterownika przewodowego / Control Kit – [`MIM-E03EN.pdf`](../MIM-E03EN.pdf), str. 6–46 | wysoka (producent) |
 | **P** | Lista kodów NASA – [`samsung_nasa_protocol.md`](../samsung_nasa_protocol.md) / [`NASA.pdf`](../NASA.pdf) (nieoficjalna, od społeczności) | średnia; część nazw to tylko `??` |
 | **K** | Kod komponentu: rejestry w [`components/samsung_nasa/nasa/*.py`](../components/samsung_nasa/nasa) (skalowanie, zakresy, mapowania tekstów) | pewna co do tego, *co robi komponent* |
-| **L** | Obserwacja w logu ESPHome z 08.10.2026 (21:48–21:53, instalacja właściciela) albo w historii Home Assistant z 07–09.11.2026 (eksport CSV, 51 h, okres awarii) – zawsze z datą przy wartości | fakt, ale z jednej instalacji; próbka z 08.10 trwa 5 minut, a zapis z 07–09.11 obejmuje pracę z usterką |
+| **L** | Obserwacja w logu ESPHome z 08.10.2026 (21:48–21:53, instalacja właściciela) albo w historii Home Assistant z 07–10.11.2026 (dwa eksporty CSV, 51 h i 17,7 h, okres awarii) – zawsze z datą przy wartości | fakt, ale z jednej instalacji; próbka z 08.10 trwa 5 minut, a zapis z 07–09.11 obejmuje pracę z usterką |
 | **W** | Wnioskowanie / hipoteza – spójne z danymi, lecz niepotwierdzone dokumentacją | niska; do weryfikacji |
 
 ### O wartościach „log"

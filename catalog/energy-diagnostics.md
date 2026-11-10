@@ -28,7 +28,7 @@ Pobór prądu, produkcja ciepła (do liczenia COP), parametry zasilania jednostk
 
 ## Zapis awarii 07–09.11.2026 (błędy 464, 462, 416)
 
-Źródło: eksport historii Home Assistant (CSV, 141 encji, 07.11 08:00 – 09.11 11:00 czasu polskiego; w pliku czasy są w UTC, tutaj podane jako CET = UTC+1). Fakty poniżej to odczyty z tego zapisu [**L**]; wnioski są oznaczone jako hipotezy [**W**]. Pompa miała wtedy ok. 1646 dni i 17 660 h pracy (`0x4423`, `0x4424`).
+Źródło: eksport historii Home Assistant (CSV, 141 encji, 07.11 08:00 – 09.11 11:00 czasu polskiego; w pliku czasy są w UTC, tutaj podane jako CET = UTC+1). Drugi eksport (09.11 16:00 – 10.11 09:40) opisuje podsekcja „Ciąg dalszy". Fakty poniżej to odczyty z tego zapisu [**L**]; wnioski są oznaczone jako hipotezy [**W**]. Pompa miała wtedy ok. 1646 dni i 17 660 h pracy (`0x4423`, `0x4424`).
 
 ### Przebieg
 
@@ -50,6 +50,23 @@ Pobór prądu, produkcja ciepła (do liczenia COP), parametry zasilania jednostk
 
 Bilans 09.11 00:00 – 11:00: pobrane 21,3 kWh, oddane 14,3 kWh (COP 0,67). Dla porównania noc 07/08.11 (18:30 – 06:30): 15,3 kWh → 30,2 kWh (COP 1,97). Razem błąd 464 wystąpił 18 razy, 462 dwa razy, 416 raz.
 
+### Ciąg dalszy 09.11 16:00 – 10.11 09:40 (bez błędów)
+
+Drugi eksport, 17,7 h; między 11:00 a 16:00 09.11 danych nie ma. Fakty [**L**]:
+
+- `0x8235` = 0 przez cały czas, żadnego odszraniania (`0x8061` = 0) przy −2…+4 °C na zewnątrz, sprężarka pracuje bez przerwy na 55–78 Hz. Jeden rozruch (09.11 21:07, po włączeniu strefy 1) udany za pierwszym razem.
+- Bilans: 45,3 kWh pobrane, 34,3 kWh oddane, **COP 0,76** (licznik `0x4427` i moc z przepływu × ΔT zgodne do 3 %).
+- Tłoczenie `0x820A` trzyma się celu `0x8223` (68–72 °C), chwilowo do 94,7 °C po rozruchu; najniżej 45,8 °C. IPM do 39 °C, przepływ 28,7–29,9 L/min, napięcie 207–220 V.
+- Sprawność zmienia się z temperaturą wody powrotnej `0x4236`:
+
+| Okres (CET) | Powrót | Sprężarka | Pobór → ciepło | COP | `0x8218` − `0x8204` |
+|---|---|---|---|---|---|
+| 09.11 16:00 – 21:00 (tylko strefa 2) | 30,6 °C | 60–72 Hz | 12,4 → 7,3 kWh | 0,59 | +1,9 K |
+| 09.11 21:30 – 10.11 01:00 | 26,1 °C | 60–68 Hz | 6,9 → 8,3 kWh | 1,19 | −1,2 K |
+| 10.11 01:00 – 09:40 | 28,8 °C | 72–78 Hz | 24,2 → 19,0 kWh | 0,79 | +1,0 K |
+
+Wniosek [**W**]: usterka trwa, choć nie ma już kodów błędów, przegrzewania ani mokrej pracy. Dwukrotna zmiana COP przy zmianie temperatury wody o 4,5 K pasuje do przecieku między stroną wysokiego i niskiego ciśnienia (im wyższe ciśnienie skraplania, tym więcej gazu wraca na ssanie), czyli do sprężarki lub zaworu 4-drożnego. Brak odszraniań przez wiele godzin pracy przy temperaturze bliskiej 0 °C jest dodatkowym objawem, że parownik nie pobiera ciepła.
+
 ### Co wykluczają dane
 
 - **Hydraulika**: przepływ `0x42E9` stały 29,5–30,3 L/min (CWU ok. 25 L/min) przez cały zapis, bez błędów 911/913.
@@ -70,3 +87,4 @@ Wszystkie przy pracującej sprężarce (`0x8238` > 0), poza odszranianiem:
 3. Moc cieplna z `0x42E9` i ΔT poniżej 40 W na 1 Hz (sprawna praca: 65–85 W/Hz przy wodzie 32–34 °C).
 4. `0x4206` < `0x4238` w trybie grzania.
 5. Dowolny kod 4xx w `0x8235`, także taki, który sam się skasował.
+6. COP poniżej 1,5 przez godzinę ciągłej pracy bez grzałki (moc z przepływu i ΔT ÷ `0x8411`) – także wtedy, gdy `0x8235` = 0: 09–10.11.2026 pompa pracowała 17,7 h bez kodu błędu z COP 0,76.
