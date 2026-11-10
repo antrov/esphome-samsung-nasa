@@ -63,6 +63,7 @@ Obserwacje, które warto znać, zanim zaufasz konkretnej encji (szczegóły przy
 7. **`0x8061` – różne mapowania.** Lista kodów podaje inne wartości (255 = brak defrostu) niż komponent (0 = brak); w logu było 0, więc mapowanie komponentu zgadza się z obserwacją.
 8. **Liczniki zawierają grzałkę booster.** Gdy grzałka pracuje, pobór (`0x8413`, `0x8414`) i ciepło (`0x4426`, `0x4427`) rosną o ok. 3,1 kW (log 08.11.2026); tylko `0x8411` jej nie zawiera. COP samej sprężarki: moc z przepływu i ΔT ÷ `0x8411` (zob. [`energy-diagnostics.md`](energy-diagnostics.md)).
 9. **`0x4206` nasyca się na 70,0 °C.** Wyższych temperatur czynnika na wymienniku płytowym nie zobaczysz (log 07–09.11.2026).
+10. **Po restarcie ESP przełączniki przez ułamek sekundy pokazują Off.** Komponent zapisuje do pompy tylko na polecenie z Home Assistant (`write_state` / `control`), a przy starcie wysyła wyłącznie żądania odczytu. Zanim przyjdzie stan z magistrali, switch ma w HA wartość Off, a number i select „unknown" (log 09.11.2026, dwa restarty: Off → On po 0,1–0,5 s dla stref, FSV 3031, FSV 4061 i `0x4111`). Pompa niczego wtedy nie przełącza, ale automatyzacja reagująca na Off zadziała fałszywie – dodaj warunek czasu trwania stanu.
 
 ## Źródła i ograniczenia
 
