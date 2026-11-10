@@ -61,7 +61,7 @@ Obserwacje, które warto znać, zanim zaufasz konkretnej encji (szczegóły przy
 5. **`0x823B` i `0x42E8`.** Wartości po przeskalowaniu (150–170 „V" DC link, 17–20 „V" czujnika przepływu) wyglądają na niezgodne ze skalą/etykietą – traktuj jako wskaźniki względne.
 6. **`0x8240` – kW czy %?** Lista kodów mówi „wartość w procentach", komponent przelicza ×0,1 jako kW; brak próbek w logu.
 7. **`0x8061` – różne mapowania.** Lista kodów podaje inne wartości (255 = brak defrostu) niż komponent (0 = brak); w logu było 0, więc mapowanie komponentu zgadza się z obserwacją.
-8. **`0x8413` zawiera grzałkę booster.** Gdy grzałka pracuje, `Outdoor Instantaneous Power` jest o ok. 3,1 kW wyższe niż `0x8411` (log 08.11.2026). Do COP sprężarki używaj `0x8411` lub licznika `0x8414`.
+8. **Liczniki zawierają grzałkę booster.** Gdy grzałka pracuje, pobór (`0x8413`, `0x8414`) i ciepło (`0x4426`, `0x4427`) rosną o ok. 3,1 kW (log 08.11.2026); tylko `0x8411` jej nie zawiera. COP samej sprężarki: moc z przepływu i ΔT ÷ `0x8411` (zob. [`energy-diagnostics.md`](energy-diagnostics.md)).
 9. **`0x4206` nasyca się na 70,0 °C.** Wyższych temperatur czynnika na wymienniku płytowym nie zobaczysz (log 07–09.11.2026).
 
 ## Źródła i ograniczenia
